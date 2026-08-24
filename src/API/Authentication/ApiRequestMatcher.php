@@ -21,11 +21,6 @@ final class ApiRequestMatcher implements RequestMatcherInterface
             return false;
         }
 
-        // API documentation is only available to registered and logged-in users
-        if (str_starts_with($request->getRequestUri(), '/api/doc')) {
-            return false;
-        }
-
         // ------------------------------------------------------------------------------------
         // the next two checks are primarily here to make sure to return proper error messages
 

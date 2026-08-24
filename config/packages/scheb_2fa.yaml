@@ -6,7 +6,6 @@ scheb_two_factor:
 
     totp:
         enabled: true
-        template: security/2fa.html.twig    # Overwritten template
         leeway: 29                          # How many seconds the code is valid
         issuer: Kimai                       # Issuer name used in QR code
 

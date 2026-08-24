@@ -1,9 +1,13 @@
 import { z } from 'zod'
-import { useFieldArray, useForm } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Link } from '@tanstack/react-router'
-import { showSubmittedData } from '@/lib/show-submitted-data'
-import { cn } from '@/lib/utils'
+import { useQuery, useMutation } from '@tanstack/react-query'
+import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { usersApi, type User } from '@/lib/api'
+import { LANGUAGES, LOCALES, timezoneOptions } from '@/lib/i18n'
+import { handleServerError } from '@/lib/handle-server-error'
+import { useAuthStore } from '@/stores/auth-store'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -22,71 +26,120 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 
 const profileFormSchema = z.object({
-  username: z
-    .string('Please enter your username.')
-    .min(2, 'Username must be at least 2 characters.')
-    .max(30, 'Username must not be longer than 30 characters.'),
-  email: z.email({
-    error: (iss) =>
-      iss.input === undefined
-        ? 'Please select an email to display.'
-        : undefined,
-  }),
-  bio: z.string().max(160).min(4),
-  urls: z
-    .array(
-      z.object({
-        value: z.url('Please enter a valid URL.'),
-      })
-    )
-    .optional(),
+  alias: z.string().max(100).optional(),
+  title: z.string().max(100).optional(),
+  accountNumber: z.string().max(100).optional(),
+  email: z.string().email('Please enter a valid email address.').max(180),
+  language: z.string().min(1, 'Please select a language.'),
+  locale: z.string().min(1, 'Please select a locale.'),
+  timezone: z.string().min(1, 'Please select a timezone.'),
+  color: z.string().max(7).optional(),
 })
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
 
-// This can come from your database or API.
-const defaultValues: Partial<ProfileFormValues> = {
-  bio: 'I own a computer.',
-  urls: [
-    { value: 'https://shadcn.com' },
-    { value: 'http://twitter.com/shadcn' },
-  ],
+function toFormValues(user: User): ProfileFormValues {
+  return {
+    alias: user.alias ?? '',
+    title: user.title ?? '',
+    accountNumber: user.accountNumber ?? '',
+    email: user.email ?? '',
+    language: user.language,
+    locale: user.locale,
+    timezone: user.timezone,
+    color: user.color ?? '',
+  }
 }
 
 export function ProfileForm() {
-  const form = useForm<ProfileFormValues>({
-    resolver: zodResolver(profileFormSchema),
-    defaultValues,
-    mode: 'onChange',
+  const { auth } = useAuthStore()
+
+  const { data: user, isPending } = useQuery({
+    queryKey: ['users', 'me'],
+    queryFn: () => usersApi.me(),
   })
 
-  const { fields, append } = useFieldArray({
-    name: 'urls',
-    control: form.control,
+  const form = useForm<ProfileFormValues>({
+    resolver: zodResolver(profileFormSchema),
+    values: user ? toFormValues(user) : undefined,
   })
+
+  const save = useMutation({
+    mutationFn: (values: ProfileFormValues) =>
+      usersApi.update(user!.id, {
+        alias: values.alias || null,
+        title: values.title || null,
+        accountNumber: values.accountNumber || null,
+        email: values.email,
+        language: values.language,
+        locale: values.locale,
+        timezone: values.timezone,
+        color: values.color || null,
+      }),
+    onSuccess: async (updated) => {
+      auth.setUser({
+        accountNo: updated.accountNumber ?? '',
+        email: updated.email ?? '',
+        role: updated.roles,
+        exp: 0,
+      })
+      toast.success('Profile updated.')
+    },
+    onError: handleServerError,
+  })
+
+  if (isPending) {
+    return (
+      <div className='flex items-center gap-2 text-muted-foreground'>
+        <Loader2 className='size-4 animate-spin' />
+        Loading profile...
+      </div>
+    )
+  }
+
+  const timezones = timezoneOptions()
 
   return (
     <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((data) => showSubmittedData(data))}
-        className='space-y-8'
-      >
+      <form onSubmit={form.handleSubmit((data) => save.mutate(data))} className='space-y-8'>
         <FormField
           control={form.control}
-          name='username'
+          name='alias'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Alias</FormLabel>
               <FormControl>
-                <Input placeholder='shadcn' {...field} />
+                <Input placeholder='Your display name' {...field} />
               </FormControl>
-              <FormDescription>
-                This is your public display name. It can be your real name or a
-                pseudonym. You can only change this once every 30 days.
-              </FormDescription>
+              <FormDescription>Public display name shown across Kimai.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='title'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Title</FormLabel>
+              <FormControl>
+                <Input placeholder='e.g. Developer' {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='accountNumber'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Account number</FormLabel>
+              <FormControl>
+                <Input placeholder='e.g. EMP-123' {...field} />
+              </FormControl>
               <FormMessage />
             </FormItem>
           )}
@@ -97,80 +150,104 @@ export function ProfileForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Email</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select a verified email to display' />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value='m@example.com'>m@example.com</SelectItem>
-                  <SelectItem value='m@google.com'>m@google.com</SelectItem>
-                  <SelectItem value='m@support.com'>m@support.com</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormDescription>
-                You can manage verified email addresses in your{' '}
-                <Link to='/'>email settings</Link>.
-              </FormDescription>
+              <FormControl>
+                <Input type='email' placeholder='you@example.com' {...field} />
+              </FormControl>
+              <FormDescription>Used for notifications and login.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name='bio'
+          name='language'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Bio</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder='Tell us a little bit about yourself'
-                  className='resize-none'
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>
-                You can <span>@mention</span> other users and organizations to
-                link to them.
-              </FormDescription>
+              <FormLabel>Language</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder='Select a language' />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {LANGUAGES.map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
         />
-        <div>
-          {fields.map((field, index) => (
-            <FormField
-              control={form.control}
-              key={field.id}
-              name={`urls.${index}.value`}
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className={cn(index !== 0 && 'sr-only')}>
-                    URLs
-                  </FormLabel>
-                  <FormDescription className={cn(index !== 0 && 'sr-only')}>
-                    Add links to your website, blog, or social media profiles.
-                  </FormDescription>
-                  <FormControl className={cn(index !== 0 && 'mt-1.5')}>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          ))}
-          <Button
-            type='button'
-            variant='outline'
-            size='sm'
-            className='mt-2'
-            onClick={() => append({ value: '' })}
-          >
-            Add URL
-          </Button>
-        </div>
-        <Button type='submit'>Update profile</Button>
+        <FormField
+          control={form.control}
+          name='locale'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Locale</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder='Select a locale' />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {LOCALES.map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='timezone'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Timezone</FormLabel>
+              <Select onValueChange={field.onChange} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder='Select a timezone' />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent className='max-h-72'>
+                  {timezones.map((zone) => (
+                    <SelectItem key={zone} value={zone}>
+                      {zone}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name='color'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Color</FormLabel>
+              <FormControl>
+                <Input type='color' className='h-10 w-16' {...field} />
+              </FormControl>
+              <FormDescription>Accent color used to identify you.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <Button type='submit' disabled={save.isPending}>
+          {save.isPending && <Loader2 className='size-4 animate-spin' />}
+          Update profile
+        </Button>
       </form>
     </Form>
   )

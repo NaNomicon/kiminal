@@ -113,9 +113,29 @@ export interface User {
   language: string
   locale: string
   timezone: string
+  color: string | null
   initials: string
   teams?: number[]
-  preferences?: Record<string, unknown>
+  preferences?: UserPreference[]
+}
+
+export interface UserPreference {
+  name: string
+  value: string | null
+}
+
+/** Returned at creation time — includes the raw secret token (shown only once). */
+export interface AccessToken {
+  id: number
+  token: string
+  name: string | null
+}
+
+/** Listed via GET — metadata only, no raw token secret. */
+export interface AccessTokenList {
+  id: number
+  name: string | null
+  lastUsage?: string | null
 }
 
 export interface Tag {
@@ -219,6 +239,12 @@ export const usersApi = {
   update: (id: number, data: Partial<User>) =>
     api.patch<User>(`/users/${id}`, data).then((r) => r.data),
   delete: (id: number) => api.delete(`/users/${id}`),
+  patchPreferences: (id: number, preferences: { name: string; value: string | boolean | null }[]) =>
+    api.patch<User>(`/users/${id}/preferences`, preferences).then((r) => r.data),
+  listTokens: () => api.get<AccessTokenList[]>('/users/api-token').then((r) => r.data),
+  createToken: (name?: string) =>
+    api.post<AccessToken>('/users/api-token', { name }).then((r) => r.data),
+  deleteToken: (id: number) => api.delete(`/users/api-token/${id}`),
 }
 
 export const tagsApi = {

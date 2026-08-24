@@ -113,7 +113,7 @@ function StartEditor({
 }: {
   onStarted: () => void
   runningCount: number
-  hardLimit: number
+  hardLimit: number | undefined
 }) {
   const queryClient = useQueryClient()
   const [projectId, setProjectId] = useState<number | undefined>(undefined)
@@ -181,7 +181,7 @@ function StartEditor({
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
-      {runningCount >= hardLimit && (
+      {hardLimit !== undefined && runningCount >= hardLimit && (
         <p className='text-xs text-muted-foreground'>
           {runningCount} of {hardLimit} timer slots used — stop one before
           starting another.
@@ -194,7 +194,7 @@ function StartEditor({
           create.isPending ||
           projectId === undefined ||
           activityId === undefined ||
-          runningCount >= hardLimit
+          (hardLimit !== undefined && runningCount >= hardLimit)
         }
       >
         {create.isPending ? (
@@ -307,6 +307,7 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
             <SelectDropdown
               isControlled
               defaultValue={projectId !== undefined ? String(projectId) : undefined}
+              disabled={activities.isLoading}
               onValueChange={(v) => {
                 const next = Number(v)
                 setProjectId(next)
@@ -440,7 +441,9 @@ export function TimerPill() {
     staleTime: 5 * 60_000,
   })
   const running = useMemo(() => active?.data ?? [], [active])
-  const hardLimit = timesheetConfig?.activeEntriesHardLimit ?? 1
+  // hardLimit stays undefined until the config query resolves; only then can we
+  // know how many concurrent timers the backend allows.
+  const hardLimit = timesheetConfig?.activeEntriesHardLimit
 
   // Keyboard shortcuts: N start, S stop first, C continue last. Ignored while typing.
   useEffect(() => {

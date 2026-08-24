@@ -91,8 +91,8 @@ class CreateUserCommandTest extends KernelTestCase
         $commandTester = $this->createUser('TokenUser', 'token@example.com', 'ROLE_USER', 'foobar12', 'cli');
 
         $output = $commandTester->getDisplay();
-        self::assertStringContainsString('[OK] Success! Created user: TokenUser with API token:', $output);
-        self::assertStringContainsString('API token: ', $output);
+        self::assertStringContainsString('[OK] Success! Created user: TokenUser', $output);
+        self::assertStringContainsString('API token (cli): ', $output);
 
         $container = self::$kernel->getContainer();
         /** @var Registry $doctrine */

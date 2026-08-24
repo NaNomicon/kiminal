@@ -73,3 +73,4 @@ Invoice create + export render are CLI-only in Kimai (no PHP HTTP routes). Rathe
 
 - Kimai legacy Twig UI (removed).
 - Invoice/export backend — deferred to the TS backend (above).
+- **Token lifecycle** — API tokens never expire, and signing out in the SPA only clears the client cookie (it cannot revoke the server token: the client holds the raw secret, not its DB id, so it has no handle to call `DELETE /api/users/api-token/{id}`). A revoke-by-secret route and/or token expiry is deferred to the TS backend.

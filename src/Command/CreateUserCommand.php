@@ -89,7 +89,8 @@ final class CreateUserCommand extends AbstractUserCommand
                 $accessToken = new AccessToken($user, $token);
                 $accessToken->setName($apiTokenName);
                 $this->accessTokenRepository->saveAccessToken($accessToken);
-                $io->success(\sprintf('Success! Created user: %s with API token: %s', $username, $token));
+                $io->success(\sprintf('Success! Created user: %s', $username));
+                $io->writeln(\sprintf('API token (%s): %s', $apiTokenName, $token));
             } else {
                 $io->success(\sprintf('Success! Created user: %s', $username));
             }

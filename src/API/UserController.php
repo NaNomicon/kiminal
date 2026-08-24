@@ -248,6 +248,11 @@ final class UserController extends BaseApiController
             throw $this->createAccessDeniedException('User has no access to API tokens');
         }
 
+        $limiter = $this->apiTokenMintLimiter->create($request->getClientIp());
+        if (false === $limiter->consume()->isAccepted()) {
+            throw new BadRequestHttpException('Too many API token requests. Possible attack?');
+        }
+
         $accessToken = new AccessToken($profile, substr(bin2hex(random_bytes(100)), 0, 25));
 
         $name = $request->request->get('name');

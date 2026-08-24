@@ -17,11 +17,11 @@ It handles use-cases of freelancers as well as companies with dozens or hundreds
 Kimai was build to track your project times and ships with many advanced features, including but not limited to:
 
 JSON API, invoicing, data exports, multi-timer and punch-in punch-out mode, tagging, multi-user - multi-timezones - multi-language ([over 30 translations existing](https://hosted.weblate.org/projects/kimai/)!),
-authentication via SAML/LDAP/Database, two-factor authentication (2FA) with TOTP, customizable role and team permissions, responsive design,
+authentication via LDAP/Database (see the Kiminal differences note about API-token-only SPA auth), customizable role and team permissions, responsive design,
 user/customer/project specific rates, advanced search & filtering, money and time budgets, advanced reporting, support for [plugins](https://www.kimai.org/store/)
 and so much more.
 
-> **Kiminal differences.** The UI is a shadcn/Tailwind SPA on top of Kimai's REST API; the legacy Bootstrap/Twig UI, web login and session auth are removed. Authentication is **API-token only** (`Authorization: Bearer <token>`). To bootstrap the first user on a fresh install, run `bin/console kimai:user:create <username> <email> <role> --api-token <name>` — it prints the token. SAML/LDAP login and two-factor authentication are not present in Kiminal. This fork does **not** track Kimai releases; upstream security patches are cherry-picked manually (see `docs/ROADMAP.md`).
+> **Kiminal differences.** The UI is a shadcn/Tailwind SPA on top of Kimai's REST API; the legacy Bootstrap/Twig UI, web login and session auth are removed. The SPA authenticates via **API token only** (`Authorization: Bearer <token>`); Kimai's LDAP and two-factor-authentication backend code remains wired but is not surfaced in the SPA, and the SAML login provider is removed. To bootstrap the first user on a fresh install, run `bin/console kimai:user:create <username> <email> <role> --api-token <name>` — it prints the token. This fork does **not** track Kimai releases; upstream security patches are cherry-picked manually (see `docs/ROADMAP.md`).
 
 ### Links
 

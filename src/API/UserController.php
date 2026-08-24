@@ -10,6 +10,7 @@
 namespace App\API;
 
 use App\API\Model\AccessToken as AccessTokenModel;
+use App\API\Model\AccessTokenList as AccessTokenListModel;
 use App\Entity\AccessToken;
 use App\Entity\Role;
 use App\Entity\User;
@@ -252,6 +253,31 @@ final class UserController extends BaseApiController
         $accessTokenRepository->saveAccessToken($accessToken);
 
         $view = new View(new AccessTokenModel($accessToken), Response::HTTP_CREATED);
+        $view->getContext()->setGroups(self::GROUPS_ENTITY);
+
+        return $this->viewHandler->handle($view);
+    }
+
+    /**
+     * List API tokens
+     *
+     * Lists the non-secret metadata of all API tokens belonging to the current user.
+     */
+    #[OA\Get(description: 'Lists the API tokens of the current user', responses: [new OA\Response(response: 200, description: 'Returns the API tokens of the current user', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/AccessTokenList')))])]
+    #[Route(methods: ['GET'], path: '/api-token', name: 'get_api_tokens')]
+    public function getApiTokens(AccessTokenRepository $accessTokenRepository): Response
+    {
+        $user = $this->getUser();
+        if (!$this->isGranted('api-token', $user)) {
+            throw $this->createAccessDeniedException('User has no access to API tokens');
+        }
+
+        $data = array_map(
+            static fn (AccessToken $accessToken) => new AccessTokenListModel($accessToken),
+            $accessTokenRepository->findForUser($user)
+        );
+
+        $view = new View($data, Response::HTTP_OK);
         $view->getContext()->setGroups(self::GROUPS_ENTITY);
 
         return $this->viewHandler->handle($view);

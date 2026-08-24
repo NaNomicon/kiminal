@@ -533,6 +533,79 @@ class UserControllerTest extends APIControllerBaseTestCase
 
     // ------------------------------------- [API TOKENS] -------------------------------------
 
+    public function testGetApiTokensIsSecure(): void
+    {
+        $this->assertRequestIsSecured(self::createClient(), '/api/users/api-token', 'GET');
+    }
+
+    public function testGetApiTokens(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_USER);
+        $user = $this->getUserByRole(User::ROLE_USER);
+        $otherUser = $this->getUserByRole(User::ROLE_ADMIN);
+
+        $em = $this->getEntityManager();
+        $tokenA = new \App\Entity\AccessToken($user, 'aaaa1111aaaa1111aaaa1111a');
+        $tokenA->setName('token-a');
+        $em->persist($tokenA);
+        $tokenB = new \App\Entity\AccessToken($user, 'bbbb2222bbbb2222bbbb2222b');
+        $tokenB->setName('token-b');
+        $em->persist($tokenB);
+        $foreign = new \App\Entity\AccessToken($otherUser, 'cccc3333cccc3333cccc3333c');
+        $foreign->setName('foreign-token');
+        $em->persist($foreign);
+        $em->flush();
+
+        $this->request($client, '/api/users/api-token', 'GET');
+
+        $response = $client->getResponse();
+        self::assertEquals(Response::HTTP_OK, $response->getStatusCode());
+
+        $content = $response->getContent();
+        self::assertIsString($content);
+        $result = json_decode($content, true);
+        self::assertIsArray($result);
+
+        $names = [];
+        foreach ($result as $token) {
+            self::assertArrayHasKey('id', $token);
+            self::assertArrayHasKey('name', $token);
+            self::assertArrayNotHasKey('token', $token);
+            $names[] = $token['name'];
+        }
+        self::assertContains('token-a', $names);
+        self::assertContains('token-b', $names);
+        self::assertNotContains('foreign-token', $names);
+    }
+
+    public function testGetApiTokensWithoutNameReturnsEmptyName(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_USER);
+        $user = $this->getUserByRole(User::ROLE_USER);
+
+        $em = $this->getEntityManager();
+        $token = new \App\Entity\AccessToken($user, 'dddd4444dddd4444dddd4444d');
+        $token->setName('');
+        $em->persist($token);
+        $em->flush();
+
+        $this->request($client, '/api/users/api-token', 'GET');
+
+        $response = $client->getResponse();
+        self::assertEquals(Response::HTTP_OK, $response->getStatusCode());
+
+        $content = $response->getContent();
+        self::assertIsString($content);
+        $result = json_decode($content, true);
+        self::assertIsArray($result);
+
+        $emptyNameTokens = array_filter($result, static fn (array $token) => $token['name'] === '');
+        self::assertNotEmpty($emptyNameTokens);
+        $token = array_values($emptyNameTokens)[0];
+        self::assertArrayHasKey('id', $token);
+        self::assertArrayNotHasKey('token', $token);
+    }
+
     public function testCreateApiTokenIsSecure(): void
     {
         $this->assertRequestIsSecured(self::createClient(), '/api/users/api-token', 'POST');
@@ -574,13 +647,5 @@ class UserControllerTest extends APIControllerBaseTestCase
         self::assertEquals(25, \strlen($result['token']));
         self::assertArrayHasKey('name', $result);
         self::assertEquals('', $result['name']);
-    }
-
-    public function testCreateApiTokenWithGetIsNotAllowed(): void
-    {
-        $client = $this->getClientForAuthenticatedUser(User::ROLE_USER);
-        $this->request($client, '/api/users/api-token', 'GET');
-
-        self::assertEquals(Response::HTTP_METHOD_NOT_ALLOWED, $client->getResponse()->getStatusCode());
     }
 }

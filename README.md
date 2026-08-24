@@ -21,7 +21,7 @@ authentication via LDAP/Database (see the Kiminal differences note about API-tok
 user/customer/project specific rates, advanced search & filtering, money and time budgets, advanced reporting, support for [plugins](https://www.kimai.org/store/)
 and so much more.
 
-> **Kiminal differences.** The UI is a shadcn/Tailwind SPA on top of Kimai's REST API; the legacy Bootstrap/Twig UI, web login and session auth are removed. The SPA authenticates via **API token only** (`Authorization: Bearer <token>`); Kimai's LDAP and two-factor-authentication backend code remains wired but is not surfaced in the SPA, and the SAML login provider is removed. To bootstrap the first user on a fresh install, run `bin/console kimai:user:create <username> <email> <role> --api-token <name>` — it prints the token. This fork does **not** track Kimai releases; upstream security patches are cherry-picked manually (see `docs/ROADMAP.md`).
+> **Kiminal differences.** The UI is a shadcn/Tailwind SPA on top of Kimai's REST API; the legacy Bootstrap/Twig UI, web login and session auth are removed. The SPA authenticates via **API token only** (`Authorization: Bearer <token>`); Kimai's LDAP and two-factor-authentication backend code remains present in the codebase but is not reachable from the SPA, and the SAML login provider is removed. To bootstrap the first user on a fresh install, run `bin/console kimai:user:create <username> <email> <role> --api-token <name>` — it prints the token. This fork does **not** track Kimai releases; upstream security patches are cherry-picked manually (see `docs/ROADMAP.md`).
 
 ### Links
 

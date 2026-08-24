@@ -6,35 +6,10 @@ import {
   Building2,
   Users,
   Settings,
-  Command,
-  GalleryVerticalEnd,
-  AudioWaveform,
 } from 'lucide-react'
 import { type SidebarData } from '../types'
 
 export const sidebarData: SidebarData = {
-  user: {
-    name: 'Kiminal',
-    email: 'kiminal@nanomicon.com',
-    avatar: '/avatars/shadcn.jpg',
-  },
-  teams: [
-    {
-      name: 'Kiminal',
-      logo: Command,
-      plan: 'Time Tracking',
-    },
-    {
-      name: 'Kimai',
-      logo: GalleryVerticalEnd,
-      plan: 'Backend',
-    },
-    {
-      name: 'Nanomicon',
-      logo: AudioWaveform,
-      plan: 'Self-hosted',
-    },
-  ],
   navGroups: [
     {
       title: 'General',

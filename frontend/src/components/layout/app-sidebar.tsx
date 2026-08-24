@@ -11,7 +11,6 @@ import { sidebarData } from './data/sidebar-data'
 import { NavGroup } from './nav-group'
 import { NavUser } from './nav-user'
 import { TeamSwitcher } from './team-switcher'
-import { RunningTimer } from '@/features/timesheets/components/running-timer'
 
 export function AppSidebar() {
   const { collapsible, variant } = useLayout()
@@ -30,7 +29,6 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
       <SidebarFooter>
-        <RunningTimer />
         <NavUser user={sidebarData.user} />
       </SidebarFooter>
       <SidebarRail />

@@ -8,7 +8,9 @@ import { visibleBadge } from '../data/data'
 import { type Activity } from '../data/schema'
 import { DataTableRowActions } from './data-table-row-actions'
 
-export const activitiesColumns: ColumnDef<Activity>[] = [
+export const activitiesColumns = (
+  projectNames: Map<number, string>
+): ColumnDef<Activity>[] => [
   {
     id: 'select',
     header: ({ table }) => (
@@ -57,7 +59,10 @@ export const activitiesColumns: ColumnDef<Activity>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Project' />
     ),
-    cell: ({ row }) => <div>{row.getValue('project')}</div>,
+    cell: ({ row }) => {
+      const id = row.getValue('project') as number
+      return <div>{projectNames.get(id) ?? '-'}</div>
+    },
   },
   {
     accessorKey: 'comment',

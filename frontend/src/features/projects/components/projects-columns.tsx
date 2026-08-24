@@ -8,7 +8,9 @@ import { visibleBadge } from '../data/data'
 import { type Project } from '../data/schema'
 import { DataTableRowActions } from './data-table-row-actions'
 
-export const projectsColumns: ColumnDef<Project>[] = [
+export const projectsColumns = (
+  customerNames: Map<number, string>
+): ColumnDef<Project>[] => [
   {
     id: 'select',
     header: ({ table }) => (
@@ -57,7 +59,10 @@ export const projectsColumns: ColumnDef<Project>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Customer' />
     ),
-    cell: ({ row }) => <div>{row.getValue('customer')}</div>,
+    cell: ({ row }) => {
+      const id = row.getValue('customer') as number
+      return <div>{customerNames.get(id) ?? '-'}</div>
+    },
   },
   {
     accessorKey: 'orderNumber',

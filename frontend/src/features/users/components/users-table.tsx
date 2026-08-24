@@ -55,7 +55,7 @@ export function UsersTable({ search, navigate }: DataTableProps) {
   const orderBy = sorting[0]?.id
   const order = sorting[0]?.desc ? 'DESC' : 'ASC'
 
-  const { data: page, isFetching } = useQuery({
+  const { data: page, isFetching, isError } = useQuery({
     queryKey: ['users', pagination.pageIndex, pagination.pageSize, globalFilter, enabledFilter, orderBy, order],
     queryFn: () =>
       usersApi.list({
@@ -146,7 +146,16 @@ export function UsersTable({ search, navigate }: DataTableProps) {
             ))}
           </TableHeader>
           <TableBody>
-            {isFetching ? (
+            {isError ? (
+              <TableRow>
+                <TableCell
+                  colSpan={columns.length}
+                  className='h-24 text-center text-muted-foreground'
+                >
+                  You do not have permission to view users.
+                </TableCell>
+              </TableRow>
+            ) : isFetching ? (
               <TableRow>
                 <TableCell
                   colSpan={columns.length}

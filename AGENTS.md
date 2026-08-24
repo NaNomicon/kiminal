@@ -74,7 +74,7 @@ Kiminal replaces Kimai's stock Bootstrap/Twig UI with a **shadcn/Tailwind SPA** 
 ## Validation
 
 - Legacy backend: `./php-cs-fixer.sh core`, `./phpstan.sh core` (src/), `./phpstan.sh test` (tests/), `vendor/bin/phpunit tests/<dir>/<Test>.php`, `composer tests-unit`.
-- Frontend + TS backend: `pnpm lint`, `pnpm test`, `pnpm build` (in `frontend/`).
+- Frontend + TS backend: `pnpm lint`, `pnpm test`, `pnpm build` (in `frontend/`). Lint must be **0 errors and 0 warnings** — fix every warning (including `react-refresh/only-export-components`) in the files you touch rather than leaving known warnings; e.g. move components out of route files into `features/` or separate files.
 - If legacy backend tests fail, clear stale cache: `rm -r ./var/cache/test/`.
 
 ## Git rules

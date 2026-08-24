@@ -5,7 +5,7 @@ import { usersApi, configApi } from '@/lib/api'
 import { prefValue } from '@/lib/preferences'
 import { WEEKDAYS } from '@/lib/i18n'
 import { handleServerError } from '@/lib/handle-server-error'
-import { FormDescription, FormItem, FormLabel } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -53,14 +53,14 @@ export function DisplayForm() {
 
   return (
     <div className='space-y-8'>
-      <FormItem>
-        <FormLabel>First day of week</FormLabel>
+      <div className='space-y-2'>
+        <Label htmlFor='weekday-select'>First day of week</Label>
         <Select
           value={currentWeekday}
           onValueChange={(v) => saveWeekday.mutate(v)}
           disabled={saveWeekday.isPending}
         >
-          <SelectTrigger>
+          <SelectTrigger id='weekday-select'>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -71,10 +71,10 @@ export function DisplayForm() {
             ))}
           </SelectContent>
         </Select>
-        <FormDescription>
+        <p className='text-sm text-muted-foreground'>
           Sets the day used to start calendar and week-based views.
-        </FormDescription>
-      </FormItem>
+        </p>
+      </div>
 
       <div className='space-y-4'>
         <div>

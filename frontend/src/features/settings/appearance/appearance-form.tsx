@@ -3,7 +3,7 @@ import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { usersApi } from '@/lib/api'
 import { handleServerError } from '@/lib/handle-server-error'
-import { FormDescription, FormItem, FormLabel } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
 import {
   Select,
   SelectContent,
@@ -41,14 +41,14 @@ export function AppearanceForm() {
   }
 
   return (
-    <FormItem>
-      <FormLabel>Skin</FormLabel>
+    <div className='space-y-2'>
+      <Label htmlFor='skin-select'>Skin</Label>
       <Select
         defaultValue={SKIN_OPTIONS[0][0]}
         onValueChange={(v) => save.mutate(v)}
         disabled={save.isPending}
       >
-        <SelectTrigger>
+        <SelectTrigger id='skin-select'>
           <SelectValue placeholder='Select a skin' />
         </SelectTrigger>
         <SelectContent>
@@ -59,9 +59,9 @@ export function AppearanceForm() {
           ))}
         </SelectContent>
       </Select>
-      <FormDescription>
+      <p className='text-sm text-muted-foreground'>
         Automatic follows the system light/dark preference.
-      </FormDescription>
-    </FormItem>
+      </p>
+    </div>
   )
 }

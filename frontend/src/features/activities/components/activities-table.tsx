@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
 import { DataTableBulkActions } from './data-table-bulk-actions'
-import { activitiesColumns as columns } from './activities-columns'
+import { activitiesColumns } from './activities-columns'
 
 type DataTableProps = {
   search: Record<string, unknown>
@@ -60,6 +60,11 @@ export function ActivitiesTable({ search, navigate }: DataTableProps) {
     queryKey: ['projects', 'options'],
     queryFn: () => projectsApi.list({ size: 100 }),
   })
+
+  const projectNames = new Map(
+    (projects?.data ?? []).map((p) => [p.id, p.name])
+  )
+  const columns = activitiesColumns(projectNames)
 
   const { data: page, isFetching } = useQuery({
     queryKey: ['activities', pagination.pageIndex, pagination.pageSize, globalFilter, projectFilter, orderBy, order],

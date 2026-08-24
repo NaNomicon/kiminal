@@ -41,6 +41,11 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
 
+function labelFor(opt: readonly (readonly [string, string])[], value: string): string | null {
+  const found = opt.find(([v]) => v === value)
+  return found ? found[1] : null
+}
+
 function toFormValues(user: User): ProfileFormValues {
   return {
     alias: user.alias ?? '',
@@ -50,7 +55,7 @@ function toFormValues(user: User): ProfileFormValues {
     language: user.language,
     locale: user.locale,
     timezone: user.timezone,
-    color: user.color ?? '',
+    color: user.color ?? '#000000',
   }
 }
 
@@ -72,7 +77,7 @@ export function ProfileForm() {
       language: '',
       locale: '',
       timezone: '',
-      color: '',
+      color: '#000000',
     },
   })
 
@@ -180,10 +185,12 @@ export function ProfileForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Language</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select key={field.value} onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder='Select a language' />
+                    <SelectValue placeholder='Select a language'>
+                      {field.value ? labelFor(LANGUAGES, field.value) ?? field.value : null}
+                    </SelectValue>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -204,10 +211,12 @@ export function ProfileForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Locale</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select key={field.value} onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder='Select a locale' />
+                    <SelectValue placeholder='Select a locale'>
+                      {field.value ? labelFor(LOCALES, field.value) ?? field.value : null}
+                    </SelectValue>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -216,6 +225,11 @@ export function ProfileForm() {
                       {label}
                     </SelectItem>
                   ))}
+                  {!LOCALES.some(([v]) => v === field.value) && field.value ? (
+                    <SelectItem key={field.value} value={field.value}>
+                      {field.value}
+                    </SelectItem>
+                  ) : null}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -228,10 +242,12 @@ export function ProfileForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Timezone</FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select key={field.value} onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder='Select a timezone' />
+                    <SelectValue placeholder='Select a timezone'>
+                      {field.value || null}
+                    </SelectValue>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent className='max-h-72'>
@@ -240,6 +256,11 @@ export function ProfileForm() {
                       {zone}
                     </SelectItem>
                   ))}
+                  {!timezones.includes(field.value) && field.value ? (
+                    <SelectItem key={field.value} value={field.value}>
+                      {field.value}
+                    </SelectItem>
+                  ) : null}
                 </SelectContent>
               </Select>
               <FormMessage />

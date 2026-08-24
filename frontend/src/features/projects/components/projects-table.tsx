@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
 import { DataTableBulkActions } from './data-table-bulk-actions'
-import { projectsColumns as columns } from './projects-columns'
+import { projectsColumns } from './projects-columns'
 
 type DataTableProps = {
   search: Record<string, unknown>
@@ -60,6 +60,11 @@ export function ProjectsTable({ search, navigate }: DataTableProps) {
     queryKey: ['customers', 'options'],
     queryFn: () => customersApi.list({ size: 100 }),
   })
+
+  const customerNames = new Map(
+    (customers?.data ?? []).map((c) => [c.id, c.name])
+  )
+  const columns = projectsColumns(customerNames)
 
   const { data: page, isFetching } = useQuery({
     queryKey: ['projects', pagination.pageIndex, pagination.pageSize, globalFilter, customerFilter, orderBy, order],

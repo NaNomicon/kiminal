@@ -523,41 +523,6 @@ parameters:
             path: src/Configuration/LdapConfiguration.php
 
         -
-            message: "#^Method App\\\\Configuration\\\\SamlConfiguration\\:\\:getAttributeMapping\\(\\) return type has no value type specified in iterable type array\\.$#"
-            count: 1
-            path: src/Configuration/SamlConfiguration.php
-
-        -
-            message: "#^Method App\\\\Configuration\\\\SamlConfiguration\\:\\:getConnection\\(\\) return type has no value type specified in iterable type array\\.$#"
-            count: 1
-            path: src/Configuration/SamlConfiguration.php
-
-        -
-            message: "#^Method App\\\\Configuration\\\\SamlConfiguration\\:\\:getProvider\\(\\) should return string but returns string\\|null\\.$#"
-            count: 1
-            path: src/Configuration/SamlConfiguration.php
-
-        -
-            message: "#^Method App\\\\Configuration\\\\SamlConfiguration\\:\\:getRolesMapping\\(\\) return type has no value type specified in iterable type array\\.$#"
-            count: 1
-            path: src/Configuration/SamlConfiguration.php
-
-        -
-            message: "#^Method App\\\\Configuration\\\\SamlConfigurationInterface\\:\\:getAttributeMapping\\(\\) return type has no value type specified in iterable type array\\.$#"
-            count: 1
-            path: src/Configuration/SamlConfigurationInterface.php
-
-        -
-            message: "#^Method App\\\\Configuration\\\\SamlConfigurationInterface\\:\\:getConnection\\(\\) return type has no value type specified in iterable type array\\.$#"
-            count: 1
-            path: src/Configuration/SamlConfigurationInterface.php
-
-        -
-            message: "#^Method App\\\\Configuration\\\\SamlConfigurationInterface\\:\\:getRolesMapping\\(\\) return type has no value type specified in iterable type array\\.$#"
-            count: 1
-            path: src/Configuration/SamlConfigurationInterface.php
-
-        -
             message: "#^Cannot cast mixed to int\\.$#"
             count: 1
             path: src/Configuration/SystemConfiguration.php
@@ -589,11 +554,6 @@ parameters:
 
         -
             message: "#^Method App\\\\Configuration\\\\SystemConfiguration\\:\\:getCustomerDefaultTimezone\\(\\) should return string\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
-            count: 1
-            path: src/Configuration/SystemConfiguration.php
-
-        -
-            message: "#^Method App\\\\Configuration\\\\SystemConfiguration\\:\\:getSamlProvider\\(\\) should return string\\|null but returns bool\\|float\\|int\\|string\\|null\\.$#"
             count: 1
             path: src/Configuration/SystemConfiguration.php
 
@@ -2566,71 +2526,6 @@ parameters:
             message: "#^Parameter \\#2 \\$amount of class App\\\\Model\\\\Revenue constructor expects float, mixed given\\.$#"
             count: 1
             path: src/Repository/TimesheetRepository.php
-
-        -
-            message: "#^Parameter \\#1 \\$message of class Symfony\\\\Component\\\\Security\\\\Core\\\\Exception\\\\AuthenticationException constructor expects string, string\\|null given\\.$#"
-            count: 1
-            path: src/Saml/SamlAuthenticator.php
-
-        -
-            message: "#^Parameter \\#1 \\$userIdentifier of class Symfony\\\\Component\\\\Security\\\\Http\\\\Authenticator\\\\Passport\\\\Badge\\\\UserBadge constructor expects string, string\\|null given\\.$#"
-            count: 1
-            path: src/Saml/SamlAuthenticator.php
-
-        -
-            message: "#^Property App\\\\Saml\\\\SamlAuthenticator\\:\\:\\$options type has no value type specified in iterable type array\\.$#"
-            count: 1
-            path: src/Saml/SamlAuthenticator.php
-
-        -
-            message: "#^Method App\\\\Saml\\\\SamlLoginAttributes\\:\\:getAttributes\\(\\) return type has no value type specified in iterable type array\\.$#"
-            count: 1
-            path: src/Saml/SamlLoginAttributes.php
-
-        -
-            message: "#^Method App\\\\Saml\\\\SamlLoginAttributes\\:\\:setAttributes\\(\\) has parameter \\$attributes with no value type specified in iterable type array\\.$#"
-            count: 1
-            path: src/Saml/SamlLoginAttributes.php
-
-        -
-            message: "#^Property App\\\\Saml\\\\SamlLoginAttributes\\:\\:\\$attributes type has no value type specified in iterable type array\\.$#"
-            count: 1
-            path: src/Saml/SamlLoginAttributes.php
-
-        -
-            message: "#^Parameter \\#4 \\$sessionIndex of method OneLogin\\\\Saml2\\\\Auth\\:\\:logout\\(\\) expects string\\|null, mixed given\\.$#"
-            count: 1
-            path: src/Saml/SamlLogoutSubscriber.php
-
-        -
-            message: "#^Argument of an invalid type mixed supplied for foreach, only iterables are supported\\.$#"
-            count: 1
-            path: src/Saml/SamlProvider.php
-
-        -
-            message: "#^Method App\\\\Saml\\\\SamlProvider\\:\\:getPropertyValue\\(\\) has parameter \\$attribute with no type specified\\.$#"
-            count: 1
-            path: src/Saml/SamlProvider.php
-
-        -
-            message: "#^Parameter \\#1 \\$identifier of method App\\\\Entity\\\\User\\:\\:setUserIdentifier\\(\\) expects string, string\\|null given\\.$#"
-            count: 2
-            path: src/Saml/SamlProvider.php
-
-        -
-            message: "#^Parameter \\#1 \\$key of function array_key_exists expects int\\|string, mixed given\\.$#"
-            count: 1
-            path: src/Saml/SamlProvider.php
-
-        -
-            message: "#^Property App\\\\Saml\\\\Security\\\\SamlAuthenticationFailureHandler\\:\\:\\$defaultOptions has no type specified\\.$#"
-            count: 1
-            path: src/Saml/Security/SamlAuthenticationFailureHandler.php
-
-        -
-            message: "#^Property App\\\\Saml\\\\Security\\\\SamlAuthenticationSuccessHandler\\:\\:\\$defaultOptions has no type specified\\.$#"
-            count: 1
-            path: src/Saml/Security/SamlAuthenticationSuccessHandler.php
 
         -
             message: "#^Method App\\\\Security\\\\KimaiUserProvider\\:\\:getProviders\\(\\) return type has no value type specified in iterable type array\\.$#"

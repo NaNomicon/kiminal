@@ -417,21 +417,6 @@ parameters:
             path: Configuration/LocaleServiceTest.php
 
         -
-            message: "#^Method App\\\\Tests\\\\Configuration\\\\SamlConfigurationTest\\:\\:getDefaultSettings\\(\\) has no return type specified\\.$#"
-            count: 1
-            path: Configuration/SamlConfigurationTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Configuration\\\\SamlConfigurationTest\\:\\:getSut\\(\\) has no return type specified\\.$#"
-            count: 1
-            path: Configuration/SamlConfigurationTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Configuration\\\\SamlConfigurationTest\\:\\:getSut\\(\\) has parameter \\$settings with no value type specified in iterable type array\\.$#"
-            count: 1
-            path: Configuration/SamlConfigurationTest.php
-
-        -
             message: "#^Cannot call method getId\\(\\) on App\\\\Entity\\\\Activity\\|null\\.$#"
             count: 4
             path: Controller/ActivityControllerTest.php
@@ -465,26 +450,6 @@ parameters:
             message: "#^Parameter \\#1 \\$projects of method App\\\\Tests\\\\DataFixtures\\\\ActivityFixtures\\:\\:setProjects\\(\\) expects array\\<App\\\\Entity\\\\Project\\>, array\\<int, App\\\\Entity\\\\Project\\|null\\> given\\.$#"
             count: 1
             path: Controller/ActivityControllerTest.php
-
-        -
-            message: "#^Cannot access property \\$firstChild on DOMNode\\|null\\.$#"
-            count: 2
-            path: Controller/Auth/SamlControllerTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Controller\\\\Auth\\\\SamlControllerTest\\:\\:getSystemConfigurationMock\\(\\) has parameter \\$loaderSettings with no value type specified in iterable type array\\.$#"
-            count: 1
-            path: Controller/Auth/SamlControllerTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Controller\\\\Auth\\\\SamlControllerTest\\:\\:getSystemConfigurationMock\\(\\) has parameter \\$settings with no value type specified in iterable type array\\.$#"
-            count: 1
-            path: Controller/Auth/SamlControllerTest.php
-
-        -
-            message: "#^Parameter \\#1 \\$source of method DOMDocument\\:\\:loadXML\\(\\) expects string, string\\|false given\\.$#"
-            count: 1
-            path: Controller/Auth/SamlControllerTest.php
 
         -
             message: "#^Method App\\\\Tests\\\\Controller\\\\CalendarControllerTest\\:\\:getDefaultSettings\\(\\) return type has no value type specified in iterable type array\\.$#"
@@ -607,11 +572,6 @@ parameters:
             path: Controller/InvoiceControllerTest.php
 
         -
-            message: "#^Parameter \\#2 \\$haystack of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringContainsString\\(\\) expects string, string\\|false given\\.$#"
-            count: 11
-            path: Controller/LayoutControllerTest.php
-
-        -
             message: "#^Cannot call method getId\\(\\) on App\\\\Entity\\\\Role\\|null\\.$#"
             count: 1
             path: Controller/PermissionControllerTest.php
@@ -640,56 +600,6 @@ parameters:
             message: "#^Parameter \\#2 \\$haystack of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringNotContainsString\\(\\) expects string, string\\|false given\\.$#"
             count: 1
             path: Controller/PermissionControllerTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Controller\\\\ProfileControllerTest\\:\\:getPreferencesTestData\\(\\) return type has no value type specified in iterable type array\\.$#"
-            count: 1
-            path: Controller/ProfileControllerTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Controller\\\\ProfileControllerTest\\:\\:getTabTestData\\(\\) return type has no value type specified in iterable type array\\.$#"
-            count: 1
-            path: Controller/ProfileControllerTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Controller\\\\ProfileControllerTest\\:\\:testEditActionTabs\\(\\) has parameter \\$role with no type specified\\.$#"
-            count: 1
-            path: Controller/ProfileControllerTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Controller\\\\ProfileControllerTest\\:\\:testEditActionTabs\\(\\) has parameter \\$username with no type specified\\.$#"
-            count: 1
-            path: Controller/ProfileControllerTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Controller\\\\ProfileControllerTest\\:\\:testPreferencesAction\\(\\) has parameter \\$hourlyRate with no type specified\\.$#"
-            count: 1
-            path: Controller/ProfileControllerTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Controller\\\\ProfileControllerTest\\:\\:testPreferencesAction\\(\\) has parameter \\$hourlyRateOriginal with no type specified\\.$#"
-            count: 1
-            path: Controller/ProfileControllerTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Controller\\\\ProfileControllerTest\\:\\:testPreferencesAction\\(\\) has parameter \\$role with no type specified\\.$#"
-            count: 1
-            path: Controller/ProfileControllerTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Controller\\\\ProfileControllerTest\\:\\:testPreferencesAction\\(\\) has parameter \\$username with no type specified\\.$#"
-            count: 1
-            path: Controller/ProfileControllerTest.php
-
-        -
-            message: "#^Parameter \\#1 \\$hashedPassword of method Symfony\\\\Component\\\\PasswordHasher\\\\PasswordHasherInterface\\:\\:verify\\(\\) expects string, string\\|null given\\.$#"
-            count: 8
-            path: Controller/ProfileControllerTest.php
-
-        -
-            message: "#^Parameter \\#2 \\$haystack of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringContainsString\\(\\) expects string, string\\|false given\\.$#"
-            count: 6
-            path: Controller/ProfileControllerTest.php
 
         -
             message: "#^Cannot call method getId\\(\\) on App\\\\Entity\\\\Activity\\|null\\.$#"
@@ -820,36 +730,6 @@ parameters:
             message: "#^Parameter \\#2 \\$haystack of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringContainsString\\(\\) expects string, string\\|false given\\.$#"
             count: 1
             path: Controller/Reporting/ProjectViewControllerTest.php
-
-        -
-            message: "#^Parameter \\#2 \\$haystack of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringContainsString\\(\\) expects string, string\\|false given\\.$#"
-            count: 6
-            path: Controller/Security/SecurityControllerTest.php
-
-        -
-            message: "#^Parameter \\#2 \\$haystack of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringNotContainsString\\(\\) expects string, string\\|false given\\.$#"
-            count: 2
-            path: Controller/Security/SecurityControllerTest.php
-
-        -
-            message: "#^Parameter \\#2 \\$haystack of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringContainsString\\(\\) expects string, string\\|false given\\.$#"
-            count: 1
-            path: Controller/Security/SecurityControllerTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Controller\\\\Security\\\\SelfRegistrationControllerTest\\:\\:testRegisterActionWithValidationProblems\\(\\) has parameter \\$formData with no value type specified in iterable type array\\.$#"
-            count: 1
-            path: Controller/Security/SelfRegistrationControllerTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Controller\\\\Security\\\\SelfRegistrationControllerTest\\:\\:testRegisterActionWithValidationProblems\\(\\) has parameter \\$validationFields with no value type specified in iterable type array\\.$#"
-            count: 1
-            path: Controller/Security/SelfRegistrationControllerTest.php
-
-        -
-            message: "#^Parameter \\#2 \\$haystack of static method PHPUnit\\\\Framework\\\\Assert\\:\\:assertStringContainsString\\(\\) expects string, string\\|false given\\.$#"
-            count: 17
-            path: Controller/Security/SelfRegistrationControllerTest.php
 
         -
             message: "#^Cannot call method getValue\\(\\) on array\\<array\\<Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\>\\|Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\>\\|Symfony\\\\Component\\\\DomCrawler\\\\Field\\\\FormField\\.$#"
@@ -1572,11 +1452,6 @@ parameters:
             path: Mocks/RoundingServiceFactory.php
 
         -
-            message: "#^Method App\\\\Tests\\\\Mocks\\\\Saml\\\\SamlAuthFactoryFactory\\:\\:create\\(\\) has parameter \\$connection with no value type specified in iterable type array\\.$#"
-            count: 1
-            path: Mocks/Saml/SamlAuthFactoryFactory.php
-
-        -
             message: "#^Method App\\\\Tests\\\\Mocks\\\\TrackingModeServiceFactory\\:\\:create\\(\\) has parameter \\$modes with no value type specified in iterable type array\\.$#"
             count: 1
             path: Mocks/TrackingModeServiceFactory.php
@@ -1705,11 +1580,6 @@ parameters:
             message: "#^Cannot call method getName\\(\\) on mixed\\.$#"
             count: 2
             path: Repository/TimesheetRepositoryTest.php
-
-        -
-            message: "#^Method App\\\\Tests\\\\Saml\\\\SamlProviderTest\\:\\:getSamlProvider\\(\\) has parameter \\$mapping with no value type specified in iterable type array\\.$#"
-            count: 1
-            path: Saml/SamlProviderTest.php
 
         -
             message: "#^Method App\\\\Tests\\\\Timesheet\\\\Calculator\\\\BillableCalculatorTest\\:\\:getTestData\\(\\) has no return type specified\\.$#"

@@ -232,7 +232,7 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
       <div className='flex items-center gap-2'>
         <span className='h-2 w-2 shrink-0 animate-pulse rounded-full bg-red-500' />
         <span className='truncate text-sm font-medium'>
-          {timesheet.description ?? activityName(timesheet) ?? `Timer #${timesheet.id}`}
+          {activityName(timesheet) ?? `Timer #${timesheet.id}`}
         </span>
         <span className='ml-auto font-mono tabular-nums text-xs text-muted-foreground'>
           <TickingClock begin={timesheet.begin} />
@@ -264,6 +264,9 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
           <ChevronDown size={14} className={cn('transition-transform', expanded && 'rotate-180')} />
         </Button>
       </div>
+      {timesheet.description && (
+        <p className='truncate pl-4 text-xs text-muted-foreground'>{timesheet.description}</p>
+      )}
       {expanded && (
         <div className='space-y-3'>
           <div className='grid gap-2 sm:grid-cols-2'>

@@ -11,7 +11,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { SignOutDialog } from '@/components/sign-out-dialog'
@@ -52,28 +51,22 @@ export function ProfileDropdown() {
             <DropdownMenuItem asChild>
               <Link to='/settings'>
                 Profile
-                <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to='/settings/account'>
                 Account
-                <DropdownMenuShortcut>⌘A</DropdownMenuShortcut>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to='/settings/notifications'>
                 Notifications
-                <DropdownMenuShortcut>⌘N</DropdownMenuShortcut>
               </Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem variant='destructive' onClick={() => setOpen(true)}>
             Sign out
-            <DropdownMenuShortcut className='text-current'>
-              ⇧⌘Q
-            </DropdownMenuShortcut>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

@@ -66,6 +66,7 @@ Invoice create + export render are CLI-only in Kimai (no PHP HTTP routes). Rathe
 - **Multi-timer hard limit is a global config choice.** `config/packages/local.yaml` sets `timesheet.active_entries.hard_limit: 3` (Kimai's default is 1, which forbids concurrent timers). The `3` is a deliberate product choice for concurrent tracking; it is **not user-configurable in the SPA** (the setting is read-only). Raise/lower it in `local.yaml`. Kimai's alternative "punch in/out" mode (`timesheet.mode: punch`) is an option if the team prefers single-timer with punch semantics.
 - **Language/locale/timezone option lists** are not exposed by the REST API — the SPA hardcodes the language/locale map from `config/locales.php` and derives timezones from `Intl.supportedValuesOf('timeZone')`.
 - **Notifications** are not exposed via REST — the settings nav no longer links a notifications form.
+- **Keyboard shortcuts are only partially wired.** Goal: the app should be fully usable with the keyboard. Today `⌘/Ctrl+K` (search) and `⌘/Ctrl+B` (sidebar) work; the running-timer `N`/`S`/`C` are global single letters (press `S` anywhere stops a running timer) and the profile dropdown displayed `⇧⌘P`/`⌘A`/`⌘N`/`⇧⌘Q` hints that were **not wired** — those fake hints are removed until a real, conflict-free shortcut scheme is designed and implemented.
 - **Deploy build assets** are gitignored (`/public/build/`); a fresh clone runs `pnpm build` + `encore production` at deploy.
 
 ## Not in scope

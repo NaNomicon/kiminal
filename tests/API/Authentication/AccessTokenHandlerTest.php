@@ -15,7 +15,12 @@ use App\Entity\User;
 use App\Repository\AccessTokenRepository;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
+use Symfony\Component\RateLimiter\Storage\CacheStorage;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 #[CoversClass(AccessTokenHandler::class)]
 class AccessTokenHandlerTest extends TestCase
@@ -25,7 +30,15 @@ class AccessTokenHandlerTest extends TestCase
         $userProvider = $this->createMock(AccessTokenRepository::class);
         $userProvider->method('findByToken')->willReturn($accessToken);
 
-        return new AccessTokenHandler($userProvider);
+        // Accept all validation attempts by default so only the auth logic is under test.
+        $limiterFactory = new RateLimiterFactory(
+            ['id' => 'test', 'policy' => 'fixed_window', 'limit' => 100, 'interval' => '1 minute'],
+            new CacheStorage(new ArrayAdapter())
+        );
+
+        $requestStack = $this->createMock(RequestStack::class);
+
+        return new AccessTokenHandler($userProvider, $limiterFactory, $requestStack);
     }
 
     public function testUnknownToken(): void

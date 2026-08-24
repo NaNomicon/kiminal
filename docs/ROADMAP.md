@@ -3,7 +3,9 @@
 **Status:** active development
 **Date:** 2026-08-24
 
-Kiminal is a fork of [Kimai](https://github.com/kimai/kimai) (AGPL-3.0) that replaces Kimai's Twig/Bootstrap UI with a `satnaing/shadcn-admin` SPA (`frontend/`, React 19, Vite 8, Tailwind v4, TanStack Router + Query, axios, zustand). The Kimai PHP backend stays headless — only the REST API (`src/API/`) plus invoice/export/email subsystems are preserved; the legacy Twig UI layer (`templates/` UI dirs, `assets/`, `src/Controller/`, `webpack.config.js`, session auth) is removed. Upstream updates are pulled from the Kimai repo.
+Kiminal is a fork of [Kimai](https://github.com/kimai/kimai) (AGPL-3.0) that replaces Kimai's Twig/Bootstrap UI with a `satnaing/shadcn-admin` SPA (`frontend/`, React 19, Vite 8, Tailwind v4, TanStack Router + Query, axios, zustand). The Kimai PHP backend stays headless — only the REST API (`src/API/`) plus invoice/export/email subsystems are preserved; the legacy Twig UI layer (`templates/` UI dirs, `assets/`, `src/Controller/`, `webpack.config.js`, session auth) is removed.
+
+> **Fork relationship (important):** Kiminal is a **divergent fork, not a release-track fork.** Because it deletes ~3800 lines of upstream Kimai (46 controllers, 161 templates, `security.yaml` firewalls), every `upstream/main` merge conflicts on those deleted files. Kiminal does **not** track upstream releases; security patches from upstream must be **cherry-picked** and resolved against this diverged tree. The AGPL obligation (release modified source if shipped as SaaS) is unaffected by this.
 
 Tracks what the SPA implements vs the full Kimai feature surface. Built features are done; gaps are the remaining surface; deferred items are explicitly parked with reasons.
 
@@ -13,7 +15,7 @@ Kimai's PHP backend is being **incrementally replaced with a TypeScript backend 
 
 - **New API routes are built in the TS backend, fully RESTful.** Do not add PHP API routes.
 - **Ported routes move from `src/API/` (PHP) to the TS backend** in the same change that touches them. Old routes are re-implemented incrementally as we have time.
-- The TS backend talks to the same `kimai2_*` DB schema (Prisma/Drizzle), so porting is schema-stable, not a data migration.
+- The TS backend talks to the same `kimai2_*` DB schema (Prisma/Drizzle). The schema is stable (no data migration), but the **Doctrine → Prisma/Drizzle mapping is a real port, not a 1:1 schema copy**: Doctrine uses PHP enum types, embedded objects, join-table inheritance, custom DBAL types (`src/Doctrine/Types/`), lifecycle callbacks, and JSON columns with PHP serialization that Prisma/Drizzle do not map natively. With 42 Doctrine entities + 72 repositories, this is a **multi-month effort**, not a quick incremental switch; the first ported route must replicate the full entity-graph behavior (cascades, orphan removal, lazy proxies), or the two ORMs will drift and silently corrupt data.
 - **REST contract:** new/ported routes are fully REST (correct verbs, resource-oriented, `HTTP 200/201/204/4xx`, `Location`/collection conventions). Do not carry over Kimai's non-REST quirks (e.g. `PATCH /stop`, non-standard status codes) into new endpoints.
 
 ## Auth (verified from source + docs)
@@ -48,6 +50,8 @@ Kimai's PHP backend is being **incrementally replaced with a TypeScript backend 
 
 ## Deferred — invoice/export (build in TS backend)
 
+> **Most impactful gap.** Invoice creation is Kimai's #1 commercial use case (freelancers billing clients). Kimai exposes invoice *list/get/download/delete* over REST but **not create** — `POST` is CLI-only (`InvoiceCreateCommand`). The SPA cannot create invoices until the TS-backend port adds `POST /api/invoices`.
+
 Invoice create + export render are CLI-only in Kimai (no PHP HTTP routes). Rather than add PHP routes, **port them to the TS backend as fully REST endpoints** when the core surface is stable. Feasible — `InvoiceService::createModel/renderInvoice/createInvoice` and `ServiceExport::getExportItems/renderers` expose the needed machinery; the CLI commands (`InvoiceCreateCommand`, `ExportCreateCommand`) show the driving pattern; `create_invoice`/`create_export` permissions already exist.
 
 | Feature | Planned TS endpoint |
@@ -59,6 +63,7 @@ Invoice create + export render are CLI-only in Kimai (no PHP HTTP routes). Rathe
 ## Notes / known limitations
 
 - **Settings — timesheet defaults are read-only.** Kimai has no per-user timesheet-default concept and no write route; the 5 fields shown (`trackingMode`, `defaultBeginTime`, `activeEntriesHardLimit`, `isAllowFutureTimes`, `isAllowOverlapping`) are global system config (super-admin, `kimai.yaml timesheet:` block).
+- **Multi-timer hard limit is a global config choice.** `config/packages/local.yaml` sets `timesheet.active_entries.hard_limit: 3` (Kimai's default is 1, which forbids concurrent timers). The `3` is a deliberate product choice for concurrent tracking; it is **not user-configurable in the SPA** (the setting is read-only). Raise/lower it in `local.yaml`. Kimai's alternative "punch in/out" mode (`timesheet.mode: punch`) is an option if the team prefers single-timer with punch semantics.
 - **Language/locale/timezone option lists** are not exposed by the REST API — the SPA hardcodes the language/locale map from `config/locales.php` and derives timezones from `Intl.supportedValuesOf('timeZone')`.
 - **Notifications** are not exposed via REST — the settings nav no longer links a notifications form.
 - **Deploy build assets** are gitignored (`/public/build/`); a fresh clone runs `pnpm build` + `encore production` at deploy.

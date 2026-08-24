@@ -120,6 +120,7 @@ class ApiDocControllerTest extends APIControllerBaseTestCase
             '/api/users/{id}',
             '/api/users/me',
             '/api/users/roles/{id}',
+            '/api/users/{id}/api-token',
             '/api/users/api-token',
             '/api/users/api-token/{id}',
             '/api/users/{id}/preferences',

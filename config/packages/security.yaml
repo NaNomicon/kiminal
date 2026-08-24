@@ -42,7 +42,7 @@ security:
         ROLE_SUPER_ADMIN: ROLE_ADMIN
 
     access_control:
-        - {path: '^/api', roles: IS_AUTHENTICATED_REMEMBERED}
+        - {path: '^/api', roles: IS_AUTHENTICATED_FULLY}
 
 when@test:
     # this configuration simplifies testing URLs protected by the security mechanism

@@ -17,15 +17,15 @@ use Symfony\Component\Security\Http\AccessMapInterface;
 /**
  * Regression test for the 2FA-API-bypass security advisory.
  *
- * The firewall-level access_control for ^/api was raised from IS_AUTHENTICATED
- * to IS_AUTHENTICATED_REMEMBERED so that a TwoFactorToken (which only satisfies
- * IS_AUTHENTICATED) can no longer reach any /api/* route, while remember_me
- * sessions used by the web frontend continue to work.
+ * The firewall-level access_control for ^/api is IS_AUTHENTICATED_FULLY so that
+ * a TwoFactorToken (which only satisfies IS_AUTHENTICATED) and remember-me
+ * sessions can no longer reach any /api/* route. Kiminal has no web-frontend
+ * session auth, so only fully authenticated Bearer-token requests are allowed.
  */
 #[Group('integration')]
 class ApiAccessControlTest extends KernelTestCase
 {
-    public function testApiRouteRequiresAuthenticatedRemembered(): void
+    public function testApiRouteRequiresFullyAuthenticated(): void
     {
         self::bootKernel();
         $accessMap = self::getContainer()->get('security.access_map');
@@ -35,9 +35,9 @@ class ApiAccessControlTest extends KernelTestCase
 
         self::assertIsArray($attributes);
         self::assertContains(
-            'IS_AUTHENTICATED_REMEMBERED',
+            'IS_AUTHENTICATED_FULLY',
             $attributes,
-            'API access_control must require IS_AUTHENTICATED_REMEMBERED to keep a TwoFactorToken from reaching /api/*'
+            'API access_control must require IS_AUTHENTICATED_FULLY to keep a TwoFactorToken or remember-me session from reaching /api/*'
         );
         self::assertNotContains(
             'IS_AUTHENTICATED',

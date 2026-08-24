@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -63,8 +64,23 @@ export function ProfileForm() {
 
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
-    values: user ? toFormValues(user) : undefined,
+    defaultValues: {
+      alias: '',
+      title: '',
+      accountNumber: '',
+      email: '',
+      language: '',
+      locale: '',
+      timezone: '',
+      color: '',
+    },
   })
+
+  useEffect(() => {
+    if (user) {
+      form.reset(toFormValues(user))
+    }
+  }, [user, form])
 
   const save = useMutation({
     mutationFn: (values: ProfileFormValues) =>

@@ -276,8 +276,19 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
               onValueChange={(v) => {
                 const next = Number(v)
                 setProjectId(next)
-                setActivityId(undefined)
-                update.mutate({ project: next })
+                // Switching project may orphan the current activity (project-specific
+                // activities only belong to one project). Pick the first activity valid
+                // for the new project and persist both together so the pair stays valid.
+                const valid = (activitiesData ?? []).filter(
+                  (a) => a.project === null || a.project === next
+                )
+                const firstActivity = valid[0]
+                setActivityId(firstActivity ? Number(firstActivity.id) : undefined)
+                update.mutate(
+                  firstActivity
+                    ? { project: next, activity: Number(firstActivity.id) }
+                    : { project: next }
+                )
               }}
               placeholder='Select a project'
               items={projectItems(projectsData)}

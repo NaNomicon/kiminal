@@ -530,4 +530,57 @@ class UserControllerTest extends APIControllerBaseTestCase
         $this->getEntityManager()->clear();
         self::assertNotNull($this->getEntityManager()->getRepository(Role::class)->find($id));
     }
+
+    // ------------------------------------- [API TOKENS] -------------------------------------
+
+    public function testCreateApiTokenIsSecure(): void
+    {
+        $this->assertRequestIsSecured(self::createClient(), '/api/users/api-token', 'POST');
+    }
+
+    public function testCreateApiToken(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_USER);
+        $this->request($client, '/api/users/api-token', 'POST', [], (string) json_encode(['name' => 'my-token']));
+
+        $response = $client->getResponse();
+        self::assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
+
+        $content = $response->getContent();
+        self::assertIsString($content);
+        $result = json_decode($content, true);
+        self::assertIsArray($result);
+        self::assertArrayHasKey('id', $result);
+        self::assertArrayHasKey('token', $result);
+        self::assertArrayHasKey('name', $result);
+        self::assertEquals('my-token', $result['name']);
+        self::assertEquals(25, \strlen($result['token']));
+        self::assertMatchesRegularExpression('/^[0-9a-f]{25}$/', $result['token']);
+    }
+
+    public function testCreateApiTokenWithoutName(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_USER);
+        $this->request($client, '/api/users/api-token', 'POST');
+
+        $response = $client->getResponse();
+        self::assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
+
+        $content = $response->getContent();
+        self::assertIsString($content);
+        $result = json_decode($content, true);
+        self::assertIsArray($result);
+        self::assertArrayHasKey('token', $result);
+        self::assertEquals(25, \strlen($result['token']));
+        self::assertArrayHasKey('name', $result);
+        self::assertEquals('', $result['name']);
+    }
+
+    public function testCreateApiTokenWithGetIsNotAllowed(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_USER);
+        $this->request($client, '/api/users/api-token', 'GET');
+
+        self::assertEquals(Response::HTTP_METHOD_NOT_ALLOWED, $client->getResponse()->getStatusCode());
+    }
 }

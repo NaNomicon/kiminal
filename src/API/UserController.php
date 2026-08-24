@@ -9,6 +9,7 @@
 
 namespace App\API;
 
+use App\API\Model\AccessToken as AccessTokenModel;
 use App\Entity\AccessToken;
 use App\Entity\Role;
 use App\Entity\User;
@@ -226,6 +227,34 @@ final class UserController extends BaseApiController
         $roleRepository->deleteRole($role);
 
         return $this->viewHandler->handle(new View(null, Response::HTTP_NO_CONTENT));
+    }
+
+    /**
+     * Create API token
+     *
+     * Creates a new API token for the current user and returns the raw token once.
+     */
+    #[OA\Post(description: 'Creates a new API token for the current user and returns the raw token once', responses: [new OA\Response(response: 201, description: 'Returns the created API token', content: new OA\JsonContent(ref: '#/components/schemas/AccessToken'))])]
+    #[OA\RequestBody(required: false, content: new OA\JsonContent(properties: [new OA\Property(property: 'name', description: 'Optional token name', type: 'string')]))]
+    #[Route(methods: ['POST'], path: '/api-token', name: 'create_api_token')]
+    public function createApiToken(Request $request, AccessTokenRepository $accessTokenRepository): Response
+    {
+        $user = $this->getUser();
+        if (!$this->isGranted('api-token', $user)) {
+            throw $this->createAccessDeniedException('User has no access to API tokens');
+        }
+
+        $accessToken = new AccessToken($user, substr(bin2hex(random_bytes(100)), 0, 25));
+
+        $name = $request->request->get('name');
+        $accessToken->setName(\is_string($name) ? $name : '');
+
+        $accessTokenRepository->saveAccessToken($accessToken);
+
+        $view = new View(new AccessTokenModel($accessToken), Response::HTTP_CREATED);
+        $view->getContext()->setGroups(self::GROUPS_ENTITY);
+
+        return $this->viewHandler->handle($view);
     }
 
     /**

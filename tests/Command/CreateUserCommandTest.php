@@ -10,7 +10,9 @@
 namespace App\Tests\Command;
 
 use App\Command\CreateUserCommand;
+use App\Entity\AccessToken;
 use App\Entity\User;
+use App\Repository\AccessTokenRepository;
 use App\Repository\UserRepository;
 use App\User\UserService;
 use Doctrine\Bundle\DoctrineBundle\Registry;
@@ -34,7 +36,11 @@ class CreateUserCommandTest extends KernelTestCase
         $container = self::$kernel->getContainer();
         /** @var UserService $userService */
         $userService = $container->get(UserService::class);
-        $this->application->add(new CreateUserCommand($userService));
+        /** @var Registry $doctrine */
+        $doctrine = $container->get('doctrine');
+        /** @var AccessTokenRepository $accessTokenRepository */
+        $accessTokenRepository = $doctrine->getRepository(AccessToken::class);
+        $this->application->add(new CreateUserCommand($userService, $accessTokenRepository));
     }
 
     public function testCreateUserFailsForShortPassword(): void
@@ -61,19 +67,47 @@ class CreateUserCommandTest extends KernelTestCase
         self::assertInstanceOf(User::class, $user);
     }
 
-    protected function createUser($username, $email, $role, $password): CommandTester
+    protected function createUser($username, $email, $role, $password, $apiTokenName = null): CommandTester
     {
         $command = $this->application->find('kimai:user:create');
         $commandTester = new CommandTester($command);
-        $commandTester->execute([
+        $args = [
             'command' => $command->getName(),
             'username' => $username,
             'email' => $email,
             'role' => $role,
             'password' => $password
-        ]);
+        ];
+        if ($apiTokenName !== null) {
+            $args['--api-token'] = $apiTokenName;
+        }
+        $commandTester->execute($args);
 
         return $commandTester;
+    }
+
+    public function testCreateUserWithApiToken(): void
+    {
+        $commandTester = $this->createUser('TokenUser', 'token@example.com', 'ROLE_USER', 'foobar12', 'cli');
+
+        $output = $commandTester->getDisplay();
+        self::assertStringContainsString('[OK] Success! Created user: TokenUser with API token:', $output);
+        self::assertStringContainsString('API token: ', $output);
+
+        $container = self::$kernel->getContainer();
+        /** @var Registry $doctrine */
+        $doctrine = $container->get('doctrine');
+        /** @var UserRepository $userRepository */
+        $userRepository = $doctrine->getRepository(User::class);
+        /** @var User $user */
+        $user = $userRepository->loadUserByIdentifier('TokenUser');
+        self::assertInstanceOf(User::class, $user);
+
+        /** @var AccessTokenRepository $accessTokenRepository */
+        $accessTokenRepository = $doctrine->getRepository(AccessToken::class);
+        $tokens = $accessTokenRepository->findForUser($user);
+        self::assertCount(1, $tokens);
+        self::assertSame('cli', $tokens[0]->getName());
     }
 
     public function testUserWithEmptyFieldsTriggersValidationProblem(): void

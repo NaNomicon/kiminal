@@ -64,7 +64,7 @@ function usePeriodTimesheets(from: Date) {
         to: toDateTimeLocal(new Date()),
         size: 500,
       })
-      return page.data
+      return { data: page.data, total: page.total }
     },
     staleTime: PERIOD_STALE_MS,
     refetchInterval: PERIOD_STALE_MS,
@@ -144,7 +144,8 @@ export function Dashboard() {
   const now = new Date()
   const yearStart = startOfYear(now)
   const period = usePeriodTimesheets(yearStart)
-  const timesheets = period.data ?? []
+  const timesheets = period.data?.data ?? []
+  const truncated = (period.data?.total ?? timesheets.length) > timesheets.length
 
   const { customers, projects, activities } = useCounts()
 
@@ -181,6 +182,12 @@ export function Dashboard() {
         <p className='text-muted-foreground'>
           Your time tracking at a glance.
         </p>
+        {truncated && (
+          <p className='mt-1 text-xs text-muted-foreground'>
+            Showing the latest {timesheets.length} of {period.data?.total}{' '}
+            entries for this year — totals may be incomplete.
+          </p>
+        )}
       </div>
 
       <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>

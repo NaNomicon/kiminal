@@ -21,6 +21,8 @@ authentication via SAML/LDAP/Database, two-factor authentication (2FA) with TOTP
 user/customer/project specific rates, advanced search & filtering, money and time budgets, advanced reporting, support for [plugins](https://www.kimai.org/store/)
 and so much more.
 
+> **Kiminal differences.** The UI is a shadcn/Tailwind SPA on top of Kimai's REST API; the legacy Bootstrap/Twig UI, web login and session auth are removed. Authentication is **API-token only** (`Authorization: Bearer <token>`). To bootstrap the first user on a fresh install, run `bin/console kimai:user:create <username> <email> <role> --api-token <name>` — it prints the token. SAML/LDAP login and two-factor authentication are not present in Kiminal. This fork does **not** track Kimai releases; upstream security patches are cherry-picked manually (see `docs/ROADMAP.md`).
+
 ### Links
 
 - [Home](https://www.kimai.org) — Kimai project homepage

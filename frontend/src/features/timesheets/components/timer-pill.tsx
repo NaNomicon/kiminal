@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { ChevronDown, Loader, Pause, Play, RotateCcw } from 'lucide-react'
 import {
   activitiesApi,
+  configApi,
   projectsApi,
   timesheetsApi,
   type Timesheet,
@@ -105,7 +106,15 @@ function projectItems(
   return projects?.map((p) => ({ label: p.name, value: String(p.id) }))
 }
 
-function StartEditor({ onStarted }: { onStarted: () => void }) {
+function StartEditor({
+  onStarted,
+  runningCount,
+  hardLimit,
+}: {
+  onStarted: () => void
+  runningCount: number
+  hardLimit: number
+}) {
   const queryClient = useQueryClient()
   const [projectId, setProjectId] = useState<number | undefined>(undefined)
   const [activityId, setActivityId] = useState<number | undefined>(undefined)
@@ -172,10 +181,21 @@ function StartEditor({ onStarted }: { onStarted: () => void }) {
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
+      {runningCount >= hardLimit && (
+        <p className='text-xs text-muted-foreground'>
+          {runningCount} of {hardLimit} timer slots used — stop one before
+          starting another.
+        </p>
+      )}
       <Button
         className='w-full'
         onClick={() => create.mutate()}
-        disabled={create.isPending || projectId === undefined || activityId === undefined}
+        disabled={
+          create.isPending ||
+          projectId === undefined ||
+          activityId === undefined ||
+          runningCount >= hardLimit
+        }
       >
         {create.isPending ? (
           <Loader size={16} className='animate-spin' />
@@ -197,6 +217,12 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
   const [description, setDescription] = useState(timesheet.description ?? '')
   const [projectId, setProjectId] = useState<number | undefined>(projectIdOf(timesheet))
   const [activityId, setActivityId] = useState<number | undefined>(activityIdOf(timesheet))
+  // Last server-confirmed values, for rolling back local state if a patch is rejected.
+  const committed = useRef({
+    projectId: projectIdOf(timesheet),
+    activityId: activityIdOf(timesheet),
+    description: timesheet.description ?? '',
+  })
 
   const activitiesForProject = useMemo(
     () =>
@@ -211,10 +237,18 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
     mutationFn: (patch: Partial<Timesheet>) =>
       timesheetsApi.update(timesheet.id, patch),
     onSuccess: () => {
+      committed.current = { projectId, activityId, description }
       queryClient.invalidateQueries({ queryKey: ['timesheets', 'active'] })
       queryClient.invalidateQueries({ queryKey: ['timesheets'] })
     },
-    onError: (error) => handleServerError(error),
+    onError: (error) => {
+      // Server rejected the patch: restore the last confirmed values so the
+      // editor doesn't stay desynced from server state.
+      setProjectId(committed.current.projectId)
+      setActivityId(committed.current.activityId)
+      setDescription(committed.current.description)
+      handleServerError(error)
+    },
   })
 
   const stop = useMutation({
@@ -400,12 +434,20 @@ export function TimerPill() {
     queryFn: () => timesheetsApi.active(),
     refetchInterval: 60000,
   })
+  const { data: timesheetConfig } = useQuery({
+    queryKey: ['config', 'timesheet'],
+    queryFn: () => configApi.timesheet(),
+    staleTime: 5 * 60_000,
+  })
   const running = useMemo(() => active?.data ?? [], [active])
+  const hardLimit = timesheetConfig?.activeEntriesHardLimit ?? 1
 
   // Keyboard shortcuts: N start, S stop first, C continue last. Ignored while typing.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (isEditingTarget(e)) return
+      // Don't trigger timer shortcuts while a dialog/modal is open.
+      if (document.querySelector('[role="dialog"]')) return
       const k = e.key.toLowerCase()
       if (k === 'n') {
         e.preventDefault()
@@ -521,11 +563,19 @@ export function TimerPill() {
                   <p className='mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground'>
                     Start another timer
                   </p>
-                  <StartEditor onStarted={() => setOpen(false)} />
+                  <StartEditor
+                    onStarted={() => setOpen(false)}
+                    runningCount={running.length}
+                    hardLimit={hardLimit}
+                  />
                 </div>
               )}
               {running.length === 0 && (
-                <StartEditor onStarted={() => setOpen(false)} />
+                <StartEditor
+                  onStarted={() => setOpen(false)}
+                  runningCount={running.length}
+                  hardLimit={hardLimit}
+                />
               )}
             </>
           )}

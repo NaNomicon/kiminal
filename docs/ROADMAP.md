@@ -21,7 +21,7 @@ Kimai's PHP backend is being **incrementally replaced with a TypeScript backend 
 ## Auth (verified from source + docs)
 
 - **Bearer token**: `Authorization: Bearer <token>`. X-AUTH-USER/X-AUTH-TOKEN (API passwords) deprecated since 2.54, removed ≤ July 2026.
-- SPA: paste-token login → validate via `GET /api/users/me` → store in zustand auth store + cookie → Bearer interceptor. Token minted in the SPA (POST `/api/users/api-token`, shown once) or Kimai UI.
+- SPA: paste-token login → validate via `GET /api/users/me` → store in zustand auth store + cookie → Bearer interceptor. Token minted in the SPA (POST `/api/users/api-token`, shown once) or, on a fresh install, by an admin via `bin/console kimai:user:create <user> <email> <role> --api-token <name>` (prints the token; there is no web login to bootstrap the first user).
 - **CORS works out of box**: `allow_origin: ['*']` on `/api/` (nelmio_cors.yaml), headers include `Authorization`, exposes pagination headers.
 - Kimai errors are `{message, code, errors}` (not `{title}`).
 

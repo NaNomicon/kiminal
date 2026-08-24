@@ -341,10 +341,12 @@ function RecentList({ onRestart }: { onRestart?: () => void }) {
  * Compact running-timer pill mounted in the shared top navigation bar.
  *
  * The pill stays glanceable: a round start/stop button plus a ticking clock
- * (with a soft glow and pulsing dot while running). Clicking the ellipsis opens
- * a popover with the full editor (project/activity/description) and the recent
- * list. Kimai requires both a project and an activity to start a timer, so the
- * play button opens the editor until both are chosen.
+ * (with a soft glow and pulsing dot while running). With multiple concurrent
+ * timers running, the pill shows the count and the popover lists an editor
+ * per timer plus a "start another" form. Clicking the ellipsis opens the
+ * popover with the editors and the recent list. Kimai requires both a project
+ * and an activity to start a timer, so the play button opens the editor until
+ * both are chosen.
  */
 export function TimerPill() {
   const queryClient = useQueryClient()
@@ -354,20 +356,21 @@ export function TimerPill() {
     queryFn: () => timesheetsApi.active(),
     refetchInterval: 60000,
   })
-  const running = active?.data[0]
+  const running = useMemo(() => active?.data ?? [], [active])
 
-  // Keyboard shortcuts: N start, S stop, C continue last. Ignored while typing.
+  // Keyboard shortcuts: N start, S stop first, C continue last. Ignored while typing.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (isEditingTarget(e)) return
       const k = e.key.toLowerCase()
       if (k === 'n') {
         e.preventDefault()
-        if (!running) setOpen(true)
+        if (running.length === 0) setOpen(true)
       } else if (k === 's') {
         e.preventDefault()
-        if (running) {
-          timesheetsApi.stop(running.id).then(() => {
+        const first = running[0]
+        if (first) {
+          timesheetsApi.stop(first.id).then(() => {
             queryClient.invalidateQueries({ queryKey: ['timesheets', 'active'] })
             queryClient.invalidateQueries({ queryKey: ['timesheets'] })
           })
@@ -394,23 +397,27 @@ export function TimerPill() {
       <div
         className={cn(
           'flex h-10 max-w-full items-center gap-2 rounded-full border px-2 text-sm transition-colors',
-          running
+          running.length > 0
             ? 'border-primary/50 bg-primary/5'
             : 'border-muted-foreground/30 text-muted-foreground'
         )}
       >
         <Button
           size='icon'
-          variant={running ? 'destructive' : 'ghost'}
+          variant={running.length > 0 ? 'destructive' : 'ghost'}
           className={cn(
             'h-8 w-8 shrink-0 rounded-full',
-            !running && 'border border-muted-foreground/30'
+            running.length === 0 && 'border border-muted-foreground/30'
           )}
-          aria-pressed={running ? 'true' : 'false'}
-          aria-label={running ? 'Stop timer' : 'Start timer'}
+          aria-pressed={running.length > 0 ? 'true' : 'false'}
+          aria-label={
+            running.length > 0 ? 'Stop all running timers' : 'Start timer'
+          }
           onClick={() => {
-            if (running) {
-              timesheetsApi.stop(running.id).then(() => {
+            if (running.length > 0) {
+              // Stop the oldest running timer first; others stay active.
+              const first = running[running.length - 1]
+              timesheetsApi.stop(first.id).then(() => {
                 queryClient.invalidateQueries({ queryKey: ['timesheets', 'active'] })
                 queryClient.invalidateQueries({ queryKey: ['timesheets'] })
                 toast.success('Timer stopped.')
@@ -420,26 +427,28 @@ export function TimerPill() {
             }
           }}
         >
-          {running ? <Pause size={16} /> : <Play size={16} />}
+          {running.length > 0 ? <Pause size={16} /> : <Play size={16} />}
         </Button>
 
-        {running && (
+        {running.length > 0 && (
           <span className='h-2 w-2 shrink-0 animate-pulse rounded-full bg-red-500' />
         )}
 
         <span
           className={cn(
             'font-mono tabular-nums',
-            running ? 'text-foreground' : 'text-muted-foreground/60'
+            running.length > 0 ? 'text-foreground' : 'text-muted-foreground/60'
           )}
           aria-live='polite'
         >
-          <TickingClock begin={running?.begin} />
+          <TickingClock begin={running.length > 0 ? running[running.length - 1].begin : undefined} />
         </span>
 
         <span className='hidden min-w-0 max-w-40 truncate sm:block'>
-          {running
-            ? (running.description ?? activityName(running) ?? 'Running timer')
+          {running.length > 0
+            ? running.length === 1
+              ? (running[0].description ?? activityName(running[0]) ?? 'Running timer')
+              : `${running.length} timers running`
             : 'Start a timer'}
         </span>
 
@@ -456,15 +465,39 @@ export function TimerPill() {
       </div>
 
       <PopoverContent align='end' className='w-80'>
-        <div className='space-y-3'>
+        <div className='space-y-4'>
           {isLoading ? (
             <div className='flex justify-center py-4'>
               <Loader size={18} className='animate-spin' />
             </div>
-          ) : running ? (
-            <RunningEditor key={running.id} timesheet={running} />
           ) : (
-            <StartEditor onStarted={() => setOpen(false)} />
+            <>
+              {running.map((t) => (
+                <div key={t.id} className='space-y-3'>
+                  <div className='flex items-center gap-2'>
+                    <span className='h-2 w-2 shrink-0 animate-pulse rounded-full bg-red-500' />
+                    <span className='truncate text-sm font-medium'>
+                      {t.description ?? activityName(t) ?? `Timer #${t.id}`}
+                    </span>
+                    <span className='ml-auto font-mono tabular-nums text-xs text-muted-foreground'>
+                      <TickingClock begin={t.begin} />
+                    </span>
+                  </div>
+                  <RunningEditor key={t.id} timesheet={t} />
+                </div>
+              ))}
+              {running.length > 0 && (
+                <div className='border-t pt-3'>
+                  <p className='mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground'>
+                    Start another timer
+                  </p>
+                  <StartEditor onStarted={() => setOpen(false)} />
+                </div>
+              )}
+              {running.length === 0 && (
+                <StartEditor onStarted={() => setOpen(false)} />
+              )}
+            </>
           )}
         </div>
         <RecentList onRestart={() => setOpen(false)} />

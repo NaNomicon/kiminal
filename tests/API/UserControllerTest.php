@@ -648,4 +648,89 @@ class UserControllerTest extends APIControllerBaseTestCase
         self::assertArrayHasKey('name', $result);
         self::assertEquals('', $result['name']);
     }
+
+    public function testCreateUserApiTokenIsSecure(): void
+    {
+        $this->assertUrlIsSecured('/api/users/1/api-token', 'POST');
+    }
+
+    public function testCreateUserApiTokenAsSuperAdmin(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_SUPER_ADMIN);
+        $user = $this->getUserByRole(User::ROLE_USER);
+
+        $this->request($client, '/api/users/' . $user->getId() . '/api-token', 'POST', [], (string) json_encode(['name' => 'provisioned']));
+
+        $response = $client->getResponse();
+        self::assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
+
+        $content = $response->getContent();
+        self::assertIsString($content);
+        $result = json_decode($content, true);
+        self::assertIsArray($result);
+        self::assertArrayHasKey('token', $result);
+        self::assertArrayHasKey('name', $result);
+        self::assertEquals('provisioned', $result['name']);
+        self::assertEquals(25, \strlen($result['token']));
+    }
+
+    public function testCreateUserApiTokenAsAdminDenied(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_ADMIN);
+        $user = $this->getUserByRole(User::ROLE_USER);
+
+        $this->request($client, '/api/users/' . $user->getId() . '/api-token', 'POST', [], (string) json_encode(['name' => 'provisioned']));
+
+        $this->assertApiException($client->getResponse(), [
+            'code' => Response::HTTP_FORBIDDEN,
+            'message' => 'Forbidden',
+        ]);
+    }
+
+    public function testDeleteApiTokenIsSecure(): void
+    {
+        $this->assertUrlIsSecured('/api/users/api-token/1', 'DELETE');
+    }
+
+    public function testDeleteApiToken(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_USER);
+        $user = $this->getUserByRole(User::ROLE_USER);
+
+        $em = $this->getEntityManager();
+        $token = new \App\Entity\AccessToken($user, 'eeee5555eeee5555eeee5555e');
+        $token->setName('to-delete');
+        $em->persist($token);
+        $em->flush();
+        $tokenId = $token->getId();
+
+        $this->request($client, '/api/users/api-token/' . $tokenId, 'DELETE');
+
+        $response = $client->getResponse();
+        self::assertEquals(Response::HTTP_OK, $response->getStatusCode());
+
+        $em->clear();
+        self::assertNull($em->getRepository(\App\Entity\AccessToken::class)->find($tokenId));
+    }
+
+    public function testDeleteApiTokenDeniedForForeignToken(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_USER);
+        $otherUser = $this->getUserByRole(User::ROLE_ADMIN);
+
+        $em = $this->getEntityManager();
+        $token = new \App\Entity\AccessToken($otherUser, 'ffff6666ffff6666ffff6666f');
+        $token->setName('foreign');
+        $em->persist($token);
+        $em->flush();
+
+        $this->request($client, '/api/users/api-token/' . $token->getId(), 'DELETE');
+
+        $this->assertApiException($client->getResponse(), [
+            'code' => Response::HTTP_FORBIDDEN,
+            'message' => 'Forbidden',
+        ]);
+
+        self::assertNotNull($em->getRepository(\App\Entity\AccessToken::class)->find($token->getId()));
+    }
 }

@@ -17,6 +17,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\RateLimiter\Storage\CacheStorage;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
@@ -39,6 +40,27 @@ class AccessTokenHandlerTest extends TestCase
         $requestStack = $this->createMock(RequestStack::class);
 
         return new AccessTokenHandler($userProvider, $limiterFactory, $requestStack);
+    }
+
+    /**
+     * @return array{handler: AccessTokenHandler, limiter: RateLimiterFactory}
+     */
+    private function getSutWithLimiter(?AccessToken $accessToken = null, int $limit = 1): array
+    {
+        $userProvider = $this->createMock(AccessTokenRepository::class);
+        $userProvider->method('findByToken')->willReturn($accessToken);
+
+        $limiterFactory = new RateLimiterFactory(
+            ['id' => 'test-reject', 'policy' => 'fixed_window', 'limit' => $limit, 'interval' => '1 minute'],
+            new CacheStorage(new ArrayAdapter())
+        );
+
+        $requestStack = $this->createMock(RequestStack::class);
+
+        return [
+            'handler' => new AccessTokenHandler($userProvider, $limiterFactory, $requestStack),
+            'limiter' => $limiterFactory,
+        ];
     }
 
     public function testUnknownToken(): void
@@ -73,5 +95,18 @@ class AccessTokenHandlerTest extends TestCase
         $badge = $sut->getUserBadgeFrom('foo');
         self::assertNotNull($accessToken->getLastUsage());
         self::assertSame('foo-bar', $badge->getUserIdentifier());
+    }
+
+    public function testInvalidTokenExhaustsValidationLimiter(): void
+    {
+        $sut = $this->getSutWithLimiter()['handler'];
+
+        // The first rejected attempt consumes the single allowed token; the second is throttled.
+        $this->expectException(BadCredentialsException::class);
+        $sut->getUserBadgeFrom('unknown');
+
+        $this->expectException(BadRequestHttpException::class);
+        $this->expectExceptionMessage('Too many API requests with invalid token. Possible attack?');
+        $sut->getUserBadgeFrom('unknown');
     }
 }

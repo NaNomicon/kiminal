@@ -66,27 +66,34 @@ export const timesheetsColumns: ColumnDef<Timesheet>[] = [
   },
   {
     id: 'customer',
-    accessorFn: (row) => row.customer?.name,
+    accessorFn: (row) => {
+      const project = row.project
+      return typeof project === 'object' && project !== null ? (project.customer as unknown as { name?: string })?.name : undefined
+    },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Customer' />
     ),
-    cell: ({ row }) => <div>{row.original.customer?.name ?? '-'}</div>,
+    cell: ({ row }) => {
+      const project = row.original.project
+      const name = typeof project === 'object' && project !== null ? (project.customer as unknown as { name?: string })?.name : undefined
+      return <div>{name ?? '-'}</div>
+    },
   },
   {
     id: 'project',
-    accessorFn: (row) => row.project?.name,
+    accessorFn: (row) => (typeof row.project === 'object' && row.project !== null ? row.project.name : undefined),
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Project' />
     ),
-    cell: ({ row }) => <div>{row.original.project?.name ?? '-'}</div>,
+    cell: ({ row }) => <div>{typeof row.original.project === 'object' && row.original.project !== null ? row.original.project.name : '-'}</div>,
   },
   {
     id: 'activity',
-    accessorFn: (row) => row.activity?.name,
+    accessorFn: (row) => (typeof row.activity === 'object' && row.activity !== null ? row.activity.name : undefined),
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Activity' />
     ),
-    cell: ({ row }) => <div>{row.original.activity?.name ?? '-'}</div>,
+    cell: ({ row }) => <div>{typeof row.original.activity === 'object' && row.original.activity !== null ? row.original.activity.name : '-'}</div>,
   },
   {
     id: 'tags',

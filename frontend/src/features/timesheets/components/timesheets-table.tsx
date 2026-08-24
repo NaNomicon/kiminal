@@ -99,6 +99,7 @@ export function TimesheetsTable({ search, navigate }: DataTableProps) {
         tags: tagsFilter,
         exported: exportedFilter,
         billable: billableFilter,
+        full: true,
       }),
   })
 

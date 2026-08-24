@@ -63,6 +63,9 @@ var/templates/
 npm-debug.log
 yarn-error.log
 ###< symfony/webpack-encore-bundle ###
+
+# Regenerated frontend build output - committed only by the maintainer
+/public/build/
 /nbproject/*
 
 .dockerhub.secrets

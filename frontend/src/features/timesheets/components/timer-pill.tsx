@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
-import { Ellipsis, Loader, Pause, Play, RotateCcw } from 'lucide-react'
+import { ChevronDown, Loader, Pause, Play, RotateCcw } from 'lucide-react'
 import {
   activitiesApi,
   projectsApi,
@@ -193,6 +193,7 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
   const { projects, activities } = useProjectsAndActivities()
   const projectsData = projects.data?.data
   const activitiesData = activities.data?.data
+  const [expanded, setExpanded] = useState(false)
   const [description, setDescription] = useState(timesheet.description ?? '')
   const [projectId, setProjectId] = useState<number | undefined>(projectIdOf(timesheet))
   const [activityId, setActivityId] = useState<number | undefined>(activityIdOf(timesheet))
@@ -228,58 +229,85 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
 
   return (
     <div className='space-y-3'>
-      <div className='grid gap-2 sm:grid-cols-2'>
-        <SelectDropdown
-          isControlled
-          defaultValue={projectId !== undefined ? String(projectId) : undefined}
-          onValueChange={(v) => {
-            const next = Number(v)
-            setProjectId(next)
-            setActivityId(undefined)
-            update.mutate({ project: next })
-          }}
-          placeholder='Select a project'
-          items={projectItems(projectsData)}
-        />
-        <SelectDropdown
-          isControlled
-          defaultValue={activityId !== undefined ? String(activityId) : undefined}
-          onValueChange={(v) => {
-            const next = Number(v)
-            setActivityId(next)
-            update.mutate({ activity: next })
-          }}
-          placeholder='Select an activity'
-          items={activitiesForProject.map((a) => ({
-            label: a.name,
-            value: String(a.id),
-          }))}
-          disabled={projectId === undefined}
-        />
+      <div className='flex items-center gap-2'>
+        <span className='h-2 w-2 shrink-0 animate-pulse rounded-full bg-red-500' />
+        <span className='truncate text-sm font-medium'>
+          {timesheet.description ?? activityName(timesheet) ?? `Timer #${timesheet.id}`}
+        </span>
+        <span className='ml-auto font-mono tabular-nums text-xs text-muted-foreground'>
+          <TickingClock begin={timesheet.begin} />
+        </span>
+        <Button
+          size='icon'
+          variant='ghost'
+          className='h-7 w-7'
+          title='Stop timer'
+          aria-label='Stop timer'
+          onClick={() => stop.mutate()}
+          disabled={stop.isPending}
+        >
+          {stop.isPending ? (
+            <Loader size={14} className='animate-spin' />
+          ) : (
+            <Pause size={14} />
+          )}
+        </Button>
+        <Button
+          size='icon'
+          variant='ghost'
+          className='h-7 w-7'
+          title={expanded ? 'Hide edit fields' : 'Edit timer'}
+          aria-label={expanded ? 'Hide edit fields' : 'Edit timer'}
+          aria-expanded={expanded}
+          onClick={() => setExpanded((v) => !v)}
+        >
+          <ChevronDown size={14} className={cn('transition-transform', expanded && 'rotate-180')} />
+        </Button>
       </div>
-      <Input
-        placeholder='What are you working on?'
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        onBlur={() => {
-          const next = description.trim()
-          if (next !== (timesheet.description ?? '')) {
-            update.mutate({ description: next || undefined })
-          }
-        }}
-      />
-      <Button
-        variant='destructive'
-        className='w-full'
-        onClick={() => stop.mutate()}
-        disabled={stop.isPending || update.isPending}      >
-        {stop.isPending ? (
-          <Loader size={16} className='animate-spin' />
-        ) : (
-          <Pause size={16} />
-        )}
-        <span>Stop timer</span>
-      </Button>
+      {expanded && (
+        <div className='space-y-3'>
+          <div className='grid gap-2 sm:grid-cols-2'>
+            <SelectDropdown
+              isControlled
+              defaultValue={projectId !== undefined ? String(projectId) : undefined}
+              onValueChange={(v) => {
+                const next = Number(v)
+                setProjectId(next)
+                setActivityId(undefined)
+                update.mutate({ project: next })
+              }}
+              placeholder='Select a project'
+              items={projectItems(projectsData)}
+            />
+            <SelectDropdown
+              isControlled
+              defaultValue={activityId !== undefined ? String(activityId) : undefined}
+              onValueChange={(v) => {
+                const next = Number(v)
+                setActivityId(next)
+                update.mutate({ activity: next })
+              }}
+              placeholder='Select an activity'
+              items={activitiesForProject.map((a) => ({
+                label: a.name,
+                value: String(a.id),
+              }))}
+              disabled={projectId === undefined}
+            />
+          </div>
+          <Input
+            placeholder='What are you working on?'
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            onBlur={() => {
+              const next = description.trim()
+              if (next !== (timesheet.description ?? '')) {
+                update.mutate({ description: next || undefined })
+              }
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -345,7 +373,7 @@ function RecentList({ onRestart }: { onRestart?: () => void }) {
  * The pill stays glanceable: a round start/stop button plus a ticking clock
  * (with a soft glow and pulsing dot while running). With multiple concurrent
  * timers running, the pill shows the count and the popover lists an editor
- * per timer plus a "start another" form. Clicking the ellipsis opens the
+ * per timer plus a "start another" form. Clicking the clock opens the
  * popover with the editors and the recent list. Kimai requires both a project
  * and an activity to start a timer, so the play button opens the editor until
  * both are chosen.
@@ -436,32 +464,29 @@ export function TimerPill() {
           <span className='h-2 w-2 shrink-0 animate-pulse rounded-full bg-red-500' />
         )}
 
-        <span
-          className={cn(
-            'font-mono tabular-nums',
-            running.length > 0 ? 'text-foreground' : 'text-muted-foreground/60'
-          )}
-          aria-live='polite'
-        >
-          <TickingClock begin={running.length > 0 ? running[running.length - 1].begin : undefined} />
-        </span>
-
-        <span className='hidden min-w-0 max-w-40 truncate sm:block'>
-          {running.length > 0
-            ? running.length === 1
-              ? (running[0].description ?? activityName(running[0]) ?? 'Running timer')
-              : `${running.length} timers running`
-            : 'Start a timer'}
-        </span>
-
         <PopoverTrigger asChild>
           <Button
             variant='ghost'
-            size='icon'
-            className='h-7 w-7 shrink-0 rounded-full'
+            className='h-8 shrink-0 gap-2 rounded-full px-2 text-left'
             aria-label='Timer options'
+            title='Timer options'
           >
-            <Ellipsis size={16} />
+            <span
+              className={cn(
+                'font-mono tabular-nums',
+                running.length > 0 ? 'text-foreground' : 'text-muted-foreground/60'
+              )}
+              aria-live='polite'
+            >
+              <TickingClock begin={running.length > 0 ? running[running.length - 1].begin : undefined} />
+            </span>
+            <span className='hidden min-w-0 max-w-40 truncate sm:block'>
+              {running.length > 0
+                ? running.length === 1
+                  ? (running[0].description ?? activityName(running[0]) ?? 'Running timer')
+                  : `${running.length} timers running`
+                : 'Start a timer'}
+            </span>
           </Button>
         </PopoverTrigger>
       </div>
@@ -475,18 +500,7 @@ export function TimerPill() {
           ) : (
             <>
               {running.map((t) => (
-                <div key={t.id} className='space-y-3'>
-                  <div className='flex items-center gap-2'>
-                    <span className='h-2 w-2 shrink-0 animate-pulse rounded-full bg-red-500' />
-                    <span className='truncate text-sm font-medium'>
-                      {t.description ?? activityName(t) ?? `Timer #${t.id}`}
-                    </span>
-                    <span className='ml-auto font-mono tabular-nums text-xs text-muted-foreground'>
-                      <TickingClock begin={t.begin} />
-                    </span>
-                  </div>
-                  <RunningEditor key={t.id} timesheet={t} />
-                </div>
+                <RunningEditor key={t.id} timesheet={t} />
               ))}
               {running.length > 0 && (
                 <div className='border-t pt-3'>

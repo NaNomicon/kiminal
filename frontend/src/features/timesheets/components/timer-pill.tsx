@@ -117,7 +117,8 @@ function StartEditor({ onStarted }: { onStarted: () => void }) {
   const activitiesForProject = useMemo(
     () =>
       (activitiesData ?? []).filter(
-        (a) => projectId === undefined || a.project === projectId
+        // a.project === null means a global activity, available to every project
+        (a) => projectId === undefined || a.project === null || a.project === projectId
       ),
     [activitiesData, projectId]
   )
@@ -199,7 +200,8 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
   const activitiesForProject = useMemo(
     () =>
       (activitiesData ?? []).filter(
-        (a) => projectId === undefined || a.project === projectId
+        // a.project === null means a global activity, available to every project
+        (a) => projectId === undefined || a.project === null || a.project === projectId
       ),
     [activitiesData, projectId]
   )

@@ -51,17 +51,23 @@ function sumDurations(timesheets: readonly { duration: number | null }[]): numbe
   return timesheets.reduce((sum, ts) => sum + (ts.duration ?? 0), 0)
 }
 
-function usePeriodHours(label: string, from: Date, to: Date) {
+// Single aggregated fetch powers all four period cards + the 7-day chart. Key is
+// day-granular so re-renders don't churn new keys (seconds-precision caused a refetch every render).
+const PERIOD_STALE_MS = 60_000
+
+function usePeriodTimesheets(from: Date) {
   return useQuery({
-    queryKey: ['dashboard', label, toDateTimeLocal(from), toDateTimeLocal(to)],
+    queryKey: ['dashboard', 'period', from.toDateString()],
     queryFn: async () => {
       const page = await timesheetsApi.list({
         from: toDateTimeLocal(from),
-        to: toDateTimeLocal(to),
+        to: toDateTimeLocal(new Date()),
         size: 500,
       })
-      return sumDurations(page.data)
+      return page.data
     },
+    staleTime: PERIOD_STALE_MS,
+    refetchInterval: PERIOD_STALE_MS,
   })
 }
 
@@ -69,14 +75,17 @@ function useCounts() {
   const customers = useQuery({
     queryKey: ['dashboard', 'counts', 'customers'],
     queryFn: () => customersApi.list({ size: 1 }).then((p) => p.total),
+    staleTime: 5 * 60_000,
   })
   const projects = useQuery({
     queryKey: ['dashboard', 'counts', 'projects'],
     queryFn: () => projectsApi.list({ size: 1 }).then((p) => p.total),
+    staleTime: 5 * 60_000,
   })
   const activities = useQuery({
     queryKey: ['dashboard', 'counts', 'activities'],
     queryFn: () => activitiesApi.list({ size: 1 }).then((p) => p.total),
+    staleTime: 5 * 60_000,
   })
   return { customers, projects, activities }
 }
@@ -133,34 +142,31 @@ function WeekBars({ totalSecondsByDay }: { totalSecondsByDay: number[] }) {
 
 export function Dashboard() {
   const now = new Date()
-  const today = usePeriodHours('today', startOfDay(now), now)
-  const week = usePeriodHours('week', startOfWeek(now), now)
-  const month = usePeriodHours('month', startOfMonth(now), now)
-  const year = usePeriodHours('year', startOfYear(now), now)
+  const yearStart = startOfYear(now)
+  const period = usePeriodTimesheets(yearStart)
+  const timesheets = period.data ?? []
+
   const { customers, projects, activities } = useCounts()
 
-  const weekAgo = new Date(now)
-  weekAgo.setDate(weekAgo.getDate() - 6)
-  const weekAgoStart = startOfDay(weekAgo)
-  const last7 = useQuery({
-    queryKey: ['dashboard', 'last7', toDateTimeLocal(weekAgoStart), toDateTimeLocal(now)],
-    queryFn: async () => {
-      const page = await timesheetsApi.list({
-        from: toDateTimeLocal(weekAgoStart),
-        to: toDateTimeLocal(now),
-        size: 500,
-      })
-      const buckets = new Array<number>(7).fill(0)
-      for (const ts of page.data) {
-        const day = new Date(ts.begin)
-        const idx = Math.floor(
-          (startOfDay(day).getTime() - weekAgoStart.getTime()) / 86400000
-        )
-        if (idx >= 0 && idx < 7) buckets[idx] += ts.duration ?? 0
-      }
-      return buckets
-    },
-  })
+  const totalFor = (from: Date, to: Date) =>
+    sumDurations(timesheets.filter((ts) => {
+      const b = new Date(ts.begin)
+      return b >= from && b <= to
+    }))
+
+  const today = totalFor(startOfDay(now), now)
+  const week = totalFor(startOfWeek(now), now)
+  const month = totalFor(startOfMonth(now), now)
+  const year = totalFor(yearStart, now)
+
+  const weekAgoStart = startOfDay(new Date(now.getTime() - 6 * 86400000))
+  const last7 = new Array<number>(7).fill(0)
+  for (const ts of timesheets) {
+    const b = new Date(ts.begin)
+    if (b < weekAgoStart || b > now) continue
+    const idx = Math.floor((startOfDay(b).getTime() - weekAgoStart.getTime()) / 86400000)
+    if (idx >= 0 && idx < 7) last7[idx] += ts.duration ?? 0
+  }
 
   const counts: Array<{ label: string; value: number }> = [
     { label: 'Customers', value: customers.data ?? 0 },
@@ -178,10 +184,10 @@ export function Dashboard() {
       </div>
 
       <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
-        <StatCard title='Today' value={formatDuration(today.data ?? 0)} />
-        <StatCard title='This Week' value={formatDuration(week.data ?? 0)} />
-        <StatCard title='This Month' value={formatDuration(month.data ?? 0)} />
-        <StatCard title='This Year' value={formatDuration(year.data ?? 0)} />
+        <StatCard title='Today' value={formatDuration(today)} />
+        <StatCard title='This Week' value={formatDuration(week)} />
+        <StatCard title='This Month' value={formatDuration(month)} />
+        <StatCard title='This Year' value={formatDuration(year)} />
       </div>
 
       <Card>
@@ -189,7 +195,7 @@ export function Dashboard() {
           <CardTitle>Last 7 Days</CardTitle>
         </CardHeader>
         <CardContent>
-          <WeekBars totalSecondsByDay={last7.data ?? []} />
+          <WeekBars totalSecondsByDay={last7} />
         </CardContent>
       </Card>
 

@@ -101,10 +101,15 @@ class AccessTokenHandlerTest extends TestCase
     {
         $sut = $this->getSutWithLimiter()['handler'];
 
-        // The first rejected attempt consumes the single allowed token; the second is throttled.
-        $this->expectException(BadCredentialsException::class);
-        $sut->getUserBadgeFrom('unknown');
+        // The first rejected attempt consumes the single allowed slot.
+        try {
+            $sut->getUserBadgeFrom('unknown');
+            self::fail('Expected BadCredentialsException on the first rejected attempt');
+        } catch (BadCredentialsException) {
+            // expected
+        }
 
+        // The second rejected attempt is throttled.
         $this->expectException(BadRequestHttpException::class);
         $this->expectExceptionMessage('Too many API requests with invalid token. Possible attack?');
         $sut->getUserBadgeFrom('unknown');

@@ -8,7 +8,7 @@
     <a href="https://packagist.org/packages/kimai/kimai"><img alt="Latest stable version" src="https://poser.pugx.org/kimai/kimai/v/stable"></a>
 </p>
 
-> **Fork notice:** This repository is a **fork of [Kimai](https://github.com/kimai/kimai)** (AGPL-3.0), the open-source time-tracking application. It is maintained independently as **Kiminal** — a modern frontend (shadcn/Tailwind SPA) built on top of Kimai's REST API. Upstream updates are pulled from the [Kimai repository](https://github.com/kimai/kimai). See [`docs/PLAN-kiminal-frontend.md`](docs/PLAN-kiminal-frontend.md) for the migration plan.
+> **Fork notice:** This repository is a **fork of [Kimai](https://github.com/kimai/kimai)** (AGPL-3.0), the open-source time-tracking application. It is maintained independently as **Kiminal** — a modern frontend (shadcn/Tailwind SPA) built on top of Kimai's REST API. Upstream updates are pulled from the [Kimai repository](https://github.com/kimai/kimai). See [`docs/ROADMAP.md`](docs/ROADMAP.md) for built-vs-gap tracking.
 
 <h1 align="center">Kimai<br>#1 Open-Source Time-Tracker</h1>
 

@@ -66,3 +66,6 @@ yarn-error.log
 /nbproject/*
 
 .dockerhub.secrets
+
+# Playwright MCP runtime artifacts
+.playwright-mcp/

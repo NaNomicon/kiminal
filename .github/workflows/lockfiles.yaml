@@ -24,4 +24,4 @@ jobs:
               with:
                   githubToken: ${{ secrets.GITHUB_TOKEN }}
                   pattern: .*\.lock$|^\.github\/.*$|^pnpm-lock.yaml$
-                  trustedAuthors: kevinpapst
+                  trustedAuthors: kevinpapst, NaNomicon

@@ -68,7 +68,9 @@ describe('UserAuthForm', () => {
     await userEvent.fill(tokenInput, 'abc123')
     await userEvent.click(signInButton)
 
-    await vi.waitFor(() => expect(setAccessTokenMock).toHaveBeenCalledWith('abc123'))
+    await vi.waitFor(() =>
+      expect(setAccessTokenMock).toHaveBeenCalledWith('abc123')
+    )
     expect(meMock).toHaveBeenCalledOnce()
     await vi.waitFor(() =>
       expect(setUserMock).toHaveBeenCalledWith({

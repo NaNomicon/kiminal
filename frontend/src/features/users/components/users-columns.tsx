@@ -65,7 +65,9 @@ export const usersColumns: ColumnDef<User>[] = [
       <DataTableColumnHeader column={column} title='Email' />
     ),
     cell: ({ row }) => (
-      <div className='w-fit ps-2 text-nowrap'>{row.getValue('email') ?? '-'}</div>
+      <div className='w-fit ps-2 text-nowrap'>
+        {row.getValue('email') ?? '-'}
+      </div>
     ),
   },
   {
@@ -79,7 +81,10 @@ export const usersColumns: ColumnDef<User>[] = [
         <div className='flex space-x-2'>
           <Badge
             variant='outline'
-            className={cn('capitalize', enabledBadge[String(enabled) as 'true' | 'false'])}
+            className={cn(
+              'capitalize',
+              enabledBadge[String(enabled) as 'true' | 'false']
+            )}
           >
             {enabled ? 'Yes' : 'No'}
           </Badge>

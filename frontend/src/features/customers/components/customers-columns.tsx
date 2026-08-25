@@ -72,7 +72,9 @@ export const customersColumns: ColumnDef<Customer>[] = [
       <DataTableColumnHeader column={column} title='Email' />
     ),
     cell: ({ row }) => (
-      <div className='w-fit ps-2 text-nowrap'>{row.getValue('email') ?? '-'}</div>
+      <div className='w-fit ps-2 text-nowrap'>
+        {row.getValue('email') ?? '-'}
+      </div>
     ),
   },
   {
@@ -91,7 +93,13 @@ export const customersColumns: ColumnDef<Customer>[] = [
       const visible = row.getValue('visible') as boolean
       return (
         <div className='flex space-x-2'>
-          <Badge variant='outline' className={cn('capitalize', visibleBadge[String(visible) as 'true' | 'false'])}>
+          <Badge
+            variant='outline'
+            className={cn(
+              'capitalize',
+              visibleBadge[String(visible) as 'true' | 'false']
+            )}
+          >
             {visible ? 'Yes' : 'No'}
           </Badge>
         </div>

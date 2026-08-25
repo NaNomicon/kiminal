@@ -12,7 +12,9 @@ import { useAuthStore } from '@/stores/auth-store'
 
 // VITE_KIMAI_URL is the full origin (e.g. http://localhost:8001); the API lives under /api.
 const configuredUrl = import.meta.env.VITE_KIMAI_URL || '/api'
-export const API_BASE_URL = configuredUrl.endsWith('/api') ? configuredUrl : `${configuredUrl.replace(/\/$/, '')}/api`
+export const API_BASE_URL = configuredUrl.endsWith('/api')
+  ? configuredUrl
+  : `${configuredUrl.replace(/\/$/, '')}/api`
 
 export const api: AxiosInstance = axios.create({
   baseURL: API_BASE_URL,
@@ -29,7 +31,8 @@ api.interceptors.request.use((config) => {
 
 // ---- Types (mirror Kimai entity serialization) ----
 
-export interface Timesheet {  id: number
+export interface Timesheet {
+  id: number
   begin: string
   end: string | null
   duration: number | null
@@ -173,7 +176,10 @@ export interface ListParams {
   [key: string]: unknown
 }
 
-function parsePage<T>(response: { data: T[]; headers: Record<string, unknown> }): Page<T> {
+function parsePage<T>(response: {
+  data: T[]
+  headers: Record<string, unknown>
+}): Page<T> {
   const num = (v: unknown) => (v === undefined || v === null ? 0 : Number(v))
   return {
     data: response.data,
@@ -193,21 +199,29 @@ async function getList<T>(url: string, params?: ListParams): Promise<Page<T>> {
 
 export const timesheetsApi = {
   list: (params?: ListParams) => getList<Timesheet>('/timesheets', params),
-  recent: (params?: ListParams) => getList<Timesheet>('/timesheets/recent', params),
-  active: (params?: ListParams) => getList<Timesheet>('/timesheets/active', params),
-  get: (id: number) => api.get<Timesheet>(`/timesheets/${id}`).then((r) => r.data),
-  create: (data: Partial<Timesheet>) => api.post<Timesheet>('/timesheets', data).then((r) => r.data),
+  recent: (params?: ListParams) =>
+    getList<Timesheet>('/timesheets/recent', params),
+  active: (params?: ListParams) =>
+    getList<Timesheet>('/timesheets/active', params),
+  get: (id: number) =>
+    api.get<Timesheet>(`/timesheets/${id}`).then((r) => r.data),
+  create: (data: Partial<Timesheet>) =>
+    api.post<Timesheet>('/timesheets', data).then((r) => r.data),
   update: (id: number, data: Partial<Timesheet>) =>
     api.patch<Timesheet>(`/timesheets/${id}`, data).then((r) => r.data),
   delete: (id: number) => api.delete(`/timesheets/${id}`),
-  stop: (id: number) => api.patch<Timesheet>(`/timesheets/${id}/stop`).then((r) => r.data),
-  restart: (id: number) => api.patch<Timesheet>(`/timesheets/${id}/restart`).then((r) => r.data),
+  stop: (id: number) =>
+    api.patch<Timesheet>(`/timesheets/${id}/stop`).then((r) => r.data),
+  restart: (id: number) =>
+    api.patch<Timesheet>(`/timesheets/${id}/restart`).then((r) => r.data),
 }
 
 export const customersApi = {
   list: (params?: ListParams) => getList<Customer>('/customers', params),
-  get: (id: number) => api.get<Customer>(`/customers/${id}`).then((r) => r.data),
-  create: (data: Partial<Customer>) => api.post<Customer>('/customers', data).then((r) => r.data),
+  get: (id: number) =>
+    api.get<Customer>(`/customers/${id}`).then((r) => r.data),
+  create: (data: Partial<Customer>) =>
+    api.post<Customer>('/customers', data).then((r) => r.data),
   update: (id: number, data: Partial<Customer>) =>
     api.patch<Customer>(`/customers/${id}`, data).then((r) => r.data),
   delete: (id: number) => api.delete(`/customers/${id}`),
@@ -216,7 +230,8 @@ export const customersApi = {
 export const projectsApi = {
   list: (params?: ListParams) => getList<Project>('/projects', params),
   get: (id: number) => api.get<Project>(`/projects/${id}`).then((r) => r.data),
-  create: (data: Partial<Project>) => api.post<Project>('/projects', data).then((r) => r.data),
+  create: (data: Partial<Project>) =>
+    api.post<Project>('/projects', data).then((r) => r.data),
   update: (id: number, data: Partial<Project>) =>
     api.patch<Project>(`/projects/${id}`, data).then((r) => r.data),
   delete: (id: number) => api.delete(`/projects/${id}`),
@@ -224,8 +239,10 @@ export const projectsApi = {
 
 export const activitiesApi = {
   list: (params?: ListParams) => getList<Activity>('/activities', params),
-  get: (id: number) => api.get<Activity>(`/activities/${id}`).then((r) => r.data),
-  create: (data: Partial<Activity>) => api.post<Activity>('/activities', data).then((r) => r.data),
+  get: (id: number) =>
+    api.get<Activity>(`/activities/${id}`).then((r) => r.data),
+  create: (data: Partial<Activity>) =>
+    api.post<Activity>('/activities', data).then((r) => r.data),
   update: (id: number, data: Partial<Activity>) =>
     api.patch<Activity>(`/activities/${id}`, data).then((r) => r.data),
   delete: (id: number) => api.delete(`/activities/${id}`),
@@ -235,13 +252,20 @@ export const usersApi = {
   list: (params?: ListParams) => getList<User>('/users', params),
   get: (id: number) => api.get<User>(`/users/${id}`).then((r) => r.data),
   me: () => api.get<User>('/users/me').then((r) => r.data),
-  create: (data: Partial<User>) => api.post<User>('/users', data).then((r) => r.data),
+  create: (data: Partial<User>) =>
+    api.post<User>('/users', data).then((r) => r.data),
   update: (id: number, data: Partial<User>) =>
     api.patch<User>(`/users/${id}`, data).then((r) => r.data),
   delete: (id: number) => api.delete(`/users/${id}`),
-  patchPreferences: (id: number, preferences: { name: string; value: string | boolean | null }[]) =>
-    api.patch<User>(`/users/${id}/preferences`, preferences).then((r) => r.data),
-  listTokens: () => api.get<AccessTokenList[]>('/users/api-token').then((r) => r.data),
+  patchPreferences: (
+    id: number,
+    preferences: { name: string; value: string | boolean | null }[]
+  ) =>
+    api
+      .patch<User>(`/users/${id}/preferences`, preferences)
+      .then((r) => r.data),
+  listTokens: () =>
+    api.get<AccessTokenList[]>('/users/api-token').then((r) => r.data),
   createToken: (name?: string) =>
     api.post<AccessToken>('/users/api-token', { name }).then((r) => r.data),
   deleteToken: (id: number) => api.delete(`/users/api-token/${id}`),
@@ -252,7 +276,8 @@ export const tagsApi = {
 }
 
 export const configApi = {
-  timesheet: () => api.get<TimesheetConfig>('/config/timesheet').then((r) => r.data),
+  timesheet: () =>
+    api.get<TimesheetConfig>('/config/timesheet').then((r) => r.data),
 }
 
 export const ping = () => api.get('/ping').then((r) => r.data)

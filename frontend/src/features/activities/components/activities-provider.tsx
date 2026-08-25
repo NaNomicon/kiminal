@@ -11,9 +11,15 @@ type ActivitiesContextType = {
   setCurrentRow: React.Dispatch<React.SetStateAction<Activity | null>>
 }
 
-const ActivitiesContext = React.createContext<ActivitiesContextType | null>(null)
+const ActivitiesContext = React.createContext<ActivitiesContextType | null>(
+  null
+)
 
-export function ActivitiesProvider({ children }: { children: React.ReactNode }) {
+export function ActivitiesProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const [open, setOpen] = useDialogState<ActivitiesDialogType>(null)
   const [currentRow, setCurrentRow] = useState<Activity | null>(null)
 

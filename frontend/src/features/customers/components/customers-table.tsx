@@ -7,8 +7,8 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { cn } from '@/lib/utils'
 import { customersApi } from '@/lib/api'
+import { cn } from '@/lib/utils'
 import { type NavigateFn, useTableUrlState } from '@/hooks/use-table-url-state'
 import {
   Table,
@@ -19,8 +19,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
-import { DataTableBulkActions } from './data-table-bulk-actions'
 import { customersColumns as columns } from './customers-columns'
+import { DataTableBulkActions } from './data-table-bulk-actions'
 
 type DataTableProps = {
   search: Record<string, unknown>
@@ -32,23 +32,26 @@ export function CustomersTable({ search, navigate }: DataTableProps) {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [sorting, setSorting] = useState<SortingState>([])
 
-  const {
-    globalFilter,
-    pagination,
-    onPaginationChange,
-    ensurePageInRange,
-  } = useTableUrlState({
-    search,
-    navigate,
-    pagination: { defaultPage: 1, defaultPageSize: 10 },
-    globalFilter: { enabled: true, key: 'term' },
-  })
+  const { globalFilter, pagination, onPaginationChange, ensurePageInRange } =
+    useTableUrlState({
+      search,
+      navigate,
+      pagination: { defaultPage: 1, defaultPageSize: 10 },
+      globalFilter: { enabled: true, key: 'term' },
+    })
 
   const orderBy = sorting[0]?.id
   const order = sorting[0]?.desc ? 'DESC' : 'ASC'
 
   const { data: page, isFetching } = useQuery({
-    queryKey: ['customers', pagination.pageIndex, pagination.pageSize, globalFilter, orderBy, order],
+    queryKey: [
+      'customers',
+      pagination.pageIndex,
+      pagination.pageSize,
+      globalFilter,
+      orderBy,
+      order,
+    ],
     queryFn: () =>
       customersApi.list({
         page: pagination.pageIndex + 1,
@@ -92,10 +95,7 @@ export function CustomersTable({ search, navigate }: DataTableProps) {
         'flex flex-1 flex-col gap-4'
       )}
     >
-      <DataTableToolbar
-        table={table}
-        searchPlaceholder='Filter customers...'
-      />
+      <DataTableToolbar table={table} searchPlaceholder='Filter customers...' />
       <div className='overflow-hidden rounded-md border'>
         <Table>
           <TableHeader>

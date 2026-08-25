@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { prefValue, prefBool } from './preferences'
 import type { UserPreference } from './api'
+import { prefValue, prefBool } from './preferences'
 
 const prefs: UserPreference[] = [
   { name: 'first_weekday', value: 'monday' },

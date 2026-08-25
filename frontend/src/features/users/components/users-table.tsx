@@ -7,8 +7,8 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { cn } from '@/lib/utils'
 import { usersApi } from '@/lib/api'
+import { cn } from '@/lib/utils'
 import { type NavigateFn, useTableUrlState } from '@/hooks/use-table-url-state'
 import {
   Table,
@@ -44,7 +44,9 @@ export function UsersTable({ search, navigate }: DataTableProps) {
     navigate,
     pagination: { defaultPage: 1, defaultPageSize: 10 },
     globalFilter: { enabled: true, key: 'term' },
-    columnFilters: [{ columnId: 'enabled', searchKey: 'enabled', type: 'array' }],
+    columnFilters: [
+      { columnId: 'enabled', searchKey: 'enabled', type: 'array' },
+    ],
   })
 
   const getArrayFilter = (id: string) =>
@@ -55,8 +57,20 @@ export function UsersTable({ search, navigate }: DataTableProps) {
   const orderBy = sorting[0]?.id
   const order = sorting[0]?.desc ? 'DESC' : 'ASC'
 
-  const { data: page, isFetching, isError } = useQuery({
-    queryKey: ['users', pagination.pageIndex, pagination.pageSize, globalFilter, enabledFilter, orderBy, order],
+  const {
+    data: page,
+    isFetching,
+    isError,
+  } = useQuery({
+    queryKey: [
+      'users',
+      pagination.pageIndex,
+      pagination.pageSize,
+      globalFilter,
+      enabledFilter,
+      orderBy,
+      order,
+    ],
     queryFn: () =>
       usersApi.list({
         page: pagination.pageIndex + 1,

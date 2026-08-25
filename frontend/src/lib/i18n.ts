@@ -85,8 +85,9 @@ export const LOCALES = [
  * available, falling back to a curated subset for older environments.
  */
 export function timezoneOptions(): string[] {
-  const supportedValuesOf = (Intl as { supportedValuesOf?: (k: string) => string[] })
-    .supportedValuesOf
+  const supportedValuesOf = (
+    Intl as { supportedValuesOf?: (k: string) => string[] }
+  ).supportedValuesOf
   if (supportedValuesOf) {
     try {
       const zones = supportedValuesOf('timeZone')

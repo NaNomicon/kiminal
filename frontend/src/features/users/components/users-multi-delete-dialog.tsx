@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { type Table } from '@tanstack/react-table'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { type Table } from '@tanstack/react-table'
 import { AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { usersApi } from '@/lib/api'
@@ -38,7 +38,9 @@ export function UsersMultiDeleteDialog<TData>({
       Promise.all(selectedRows.map((row) => usersApi.delete(row.original.id))),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
-      toast.success(`Deleted ${selectedRows.length} user${selectedRows.length > 1 ? 's' : ''}.`)
+      toast.success(
+        `Deleted ${selectedRows.length} user${selectedRows.length > 1 ? 's' : ''}.`
+      )
       setValue('')
       table.resetRowSelection()
       onOpenChange(false)

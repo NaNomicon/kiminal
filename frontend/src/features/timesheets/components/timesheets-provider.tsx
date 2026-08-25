@@ -11,9 +11,15 @@ type TimesheetsContextType = {
   setCurrentRow: React.Dispatch<React.SetStateAction<Timesheet | null>>
 }
 
-const TimesheetsContext = React.createContext<TimesheetsContextType | null>(null)
+const TimesheetsContext = React.createContext<TimesheetsContextType | null>(
+  null
+)
 
-export function TimesheetsProvider({ children }: { children: React.ReactNode }) {
+export function TimesheetsProvider({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const [open, setOpen] = useDialogState<TimesheetsDialogType>(null)
   const [currentRow, setCurrentRow] = useState<Timesheet | null>(null)
 

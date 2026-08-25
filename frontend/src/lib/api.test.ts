@@ -1,12 +1,12 @@
 import { describe, expect, it, beforeEach } from 'vitest'
-import { api, timesheetsApi } from './api'
 import { useAuthStore } from '@/stores/auth-store'
+import { api, timesheetsApi } from './api'
 
 function mockAdapter(
   handler: (config: { headers: Record<string, unknown> }) => {
     data: unknown
     headers?: Record<string, string>
-  },
+  }
 ) {
   api.defaults.adapter = async (config) => {
     const { data, headers = {} } = handler(config)

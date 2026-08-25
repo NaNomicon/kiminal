@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
 import { ChevronDown, Loader, Pause, Play, RotateCcw } from 'lucide-react'
+import { toast } from 'sonner'
 import {
   activitiesApi,
   configApi,
@@ -10,6 +10,7 @@ import {
   type Timesheet,
 } from '@/lib/api'
 import { handleServerError } from '@/lib/handle-server-error'
+import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -18,7 +19,6 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover'
 import { SelectDropdown } from '@/components/select-dropdown'
-import { cn } from '@/lib/utils'
 
 function projectName(t: Timesheet): string | undefined {
   return typeof t.project === 'object' && t.project !== null
@@ -127,7 +127,10 @@ function StartEditor({
     () =>
       (activitiesData ?? []).filter(
         // a.project === null means a global activity, available to every project
-        (a) => projectId === undefined || a.project === null || a.project === projectId
+        (a) =>
+          projectId === undefined ||
+          a.project === null ||
+          a.project === projectId
       ),
     [activitiesData, projectId]
   )
@@ -166,7 +169,9 @@ function StartEditor({
         />
         <SelectDropdown
           isControlled
-          defaultValue={activityId !== undefined ? String(activityId) : undefined}
+          defaultValue={
+            activityId !== undefined ? String(activityId) : undefined
+          }
           onValueChange={(v) => setActivityId(Number(v))}
           placeholder='Select an activity'
           items={activitiesForProject.map((a) => ({
@@ -215,8 +220,12 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
   const activitiesData = activities.data?.data
   const [expanded, setExpanded] = useState(false)
   const [description, setDescription] = useState(timesheet.description ?? '')
-  const [projectId, setProjectId] = useState<number | undefined>(projectIdOf(timesheet))
-  const [activityId, setActivityId] = useState<number | undefined>(activityIdOf(timesheet))
+  const [projectId, setProjectId] = useState<number | undefined>(
+    projectIdOf(timesheet)
+  )
+  const [activityId, setActivityId] = useState<number | undefined>(
+    activityIdOf(timesheet)
+  )
   // Last server-confirmed values, for rolling back local state if a patch is rejected.
   const committed = useRef({
     projectId: projectIdOf(timesheet),
@@ -228,7 +237,10 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
     () =>
       (activitiesData ?? []).filter(
         // a.project === null means a global activity, available to every project
-        (a) => projectId === undefined || a.project === null || a.project === projectId
+        (a) =>
+          projectId === undefined ||
+          a.project === null ||
+          a.project === projectId
       ),
     [activitiesData, projectId]
   )
@@ -268,7 +280,7 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
         <span className='truncate text-sm font-medium'>
           {activityName(timesheet) ?? `Timer #${timesheet.id}`}
         </span>
-        <span className='ml-auto font-mono tabular-nums text-xs text-muted-foreground'>
+        <span className='ml-auto font-mono text-xs text-muted-foreground tabular-nums'>
           <TickingClock begin={timesheet.begin} />
         </span>
         <Button
@@ -295,18 +307,25 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
           aria-expanded={expanded}
           onClick={() => setExpanded((v) => !v)}
         >
-          <ChevronDown size={14} className={cn('transition-transform', expanded && 'rotate-180')} />
+          <ChevronDown
+            size={14}
+            className={cn('transition-transform', expanded && 'rotate-180')}
+          />
         </Button>
       </div>
       {timesheet.description && (
-        <p className='truncate pl-4 text-xs text-muted-foreground'>{timesheet.description}</p>
+        <p className='truncate pl-4 text-xs text-muted-foreground'>
+          {timesheet.description}
+        </p>
       )}
       {expanded && (
         <div className='space-y-3'>
           <div className='grid gap-2 sm:grid-cols-2'>
             <SelectDropdown
               isControlled
-              defaultValue={projectId !== undefined ? String(projectId) : undefined}
+              defaultValue={
+                projectId !== undefined ? String(projectId) : undefined
+              }
               disabled={activities.isLoading}
               onValueChange={(v) => {
                 const next = Number(v)
@@ -318,7 +337,9 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
                   (a) => a.project === null || a.project === next
                 )
                 const firstActivity = valid[0]
-                setActivityId(firstActivity ? Number(firstActivity.id) : undefined)
+                setActivityId(
+                  firstActivity ? Number(firstActivity.id) : undefined
+                )
                 update.mutate(
                   firstActivity
                     ? { project: next, activity: Number(firstActivity.id) }
@@ -330,7 +351,9 @@ function RunningEditor({ timesheet }: { timesheet: Timesheet }) {
             />
             <SelectDropdown
               isControlled
-              defaultValue={activityId !== undefined ? String(activityId) : undefined}
+              defaultValue={
+                activityId !== undefined ? String(activityId) : undefined
+              }
               onValueChange={(v) => {
                 const next = Number(v)
                 setActivityId(next)
@@ -384,7 +407,7 @@ function RecentList({ onRestart }: { onRestart?: () => void }) {
 
   return (
     <div className='space-y-1 border-t pt-3'>
-      <p className='text-xs font-medium uppercase tracking-wide text-muted-foreground'>
+      <p className='text-xs font-medium tracking-wide text-muted-foreground uppercase'>
         Recent
       </p>
       {entries.map((t) => (
@@ -460,7 +483,9 @@ export function TimerPill() {
         const first = running[0]
         if (first) {
           timesheetsApi.stop(first.id).then(() => {
-            queryClient.invalidateQueries({ queryKey: ['timesheets', 'active'] })
+            queryClient.invalidateQueries({
+              queryKey: ['timesheets', 'active'],
+            })
             queryClient.invalidateQueries({ queryKey: ['timesheets'] })
           })
         }
@@ -470,7 +495,9 @@ export function TimerPill() {
           const last = p.data[0]
           if (last) {
             timesheetsApi.restart(last.id).then(() => {
-              queryClient.invalidateQueries({ queryKey: ['timesheets', 'active'] })
+              queryClient.invalidateQueries({
+                queryKey: ['timesheets', 'active'],
+              })
               queryClient.invalidateQueries({ queryKey: ['timesheets'] })
             })
           }
@@ -507,7 +534,9 @@ export function TimerPill() {
               // Stop the oldest running timer first; others stay active.
               const first = running[running.length - 1]
               timesheetsApi.stop(first.id).then(() => {
-                queryClient.invalidateQueries({ queryKey: ['timesheets', 'active'] })
+                queryClient.invalidateQueries({
+                  queryKey: ['timesheets', 'active'],
+                })
                 queryClient.invalidateQueries({ queryKey: ['timesheets'] })
                 toast.success('Timer stopped.')
               })
@@ -533,16 +562,26 @@ export function TimerPill() {
             <span
               className={cn(
                 'font-mono tabular-nums',
-                running.length > 0 ? 'text-foreground' : 'text-muted-foreground/60'
+                running.length > 0
+                  ? 'text-foreground'
+                  : 'text-muted-foreground/60'
               )}
               aria-live='polite'
             >
-              <TickingClock begin={running.length > 0 ? running[running.length - 1].begin : undefined} />
+              <TickingClock
+                begin={
+                  running.length > 0
+                    ? running[running.length - 1].begin
+                    : undefined
+                }
+              />
             </span>
-            <span className='hidden min-w-0 max-w-40 truncate sm:block'>
+            <span className='hidden max-w-40 min-w-0 truncate sm:block'>
               {running.length > 0
                 ? running.length === 1
-                  ? (running[0].description ?? activityName(running[0]) ?? 'Running timer')
+                  ? (running[0].description ??
+                    activityName(running[0]) ??
+                    'Running timer')
                   : `${running.length} timers running`
                 : 'Start a timer'}
             </span>
@@ -563,7 +602,7 @@ export function TimerPill() {
               ))}
               {running.length > 0 && (
                 <div className='border-t pt-3'>
-                  <p className='mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground'>
+                  <p className='mb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase'>
                     Start another timer
                   </p>
                   <StartEditor

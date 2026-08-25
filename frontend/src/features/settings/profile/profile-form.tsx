@@ -5,10 +5,10 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useQuery, useMutation } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { usersApi, type User } from '@/lib/api'
-import { LANGUAGES, LOCALES, timezoneOptions } from '@/lib/i18n'
-import { handleServerError } from '@/lib/handle-server-error'
 import { useAuthStore } from '@/stores/auth-store'
+import { usersApi, type User } from '@/lib/api'
+import { handleServerError } from '@/lib/handle-server-error'
+import { LANGUAGES, LOCALES, timezoneOptions } from '@/lib/i18n'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -41,7 +41,10 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
 
-function labelFor(opt: readonly (readonly [string, string])[], value: string): string | null {
+function labelFor(
+  opt: readonly (readonly [string, string])[],
+  value: string
+): string | null {
   const found = opt.find(([v]) => v === value)
   return found ? found[1] : null
 }
@@ -124,7 +127,10 @@ export function ProfileForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit((data) => save.mutate(data))} className='space-y-8'>
+      <form
+        onSubmit={form.handleSubmit((data) => save.mutate(data))}
+        className='space-y-8'
+      >
         <FormField
           control={form.control}
           name='alias'
@@ -134,7 +140,9 @@ export function ProfileForm() {
               <FormControl>
                 <Input placeholder='Your display name' {...field} />
               </FormControl>
-              <FormDescription>Public display name shown across Kimai.</FormDescription>
+              <FormDescription>
+                Public display name shown across Kimai.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -174,7 +182,9 @@ export function ProfileForm() {
               <FormControl>
                 <Input type='email' placeholder='you@example.com' {...field} />
               </FormControl>
-              <FormDescription>Used for notifications and login.</FormDescription>
+              <FormDescription>
+                Used for notifications and login.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -185,11 +195,17 @@ export function ProfileForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Language</FormLabel>
-              <Select key={field.value} onValueChange={field.onChange} value={field.value}>
+              <Select
+                key={field.value}
+                onValueChange={field.onChange}
+                value={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder='Select a language'>
-                      {field.value ? labelFor(LANGUAGES, field.value) ?? field.value : null}
+                      {field.value
+                        ? (labelFor(LANGUAGES, field.value) ?? field.value)
+                        : null}
                     </SelectValue>
                   </SelectTrigger>
                 </FormControl>
@@ -211,11 +227,17 @@ export function ProfileForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Locale</FormLabel>
-              <Select key={field.value} onValueChange={field.onChange} value={field.value}>
+              <Select
+                key={field.value}
+                onValueChange={field.onChange}
+                value={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder='Select a locale'>
-                      {field.value ? labelFor(LOCALES, field.value) ?? field.value : null}
+                      {field.value
+                        ? (labelFor(LOCALES, field.value) ?? field.value)
+                        : null}
                     </SelectValue>
                   </SelectTrigger>
                 </FormControl>
@@ -242,7 +264,11 @@ export function ProfileForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Timezone</FormLabel>
-              <Select key={field.value} onValueChange={field.onChange} value={field.value}>
+              <Select
+                key={field.value}
+                onValueChange={field.onChange}
+                value={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder='Select a timezone'>
@@ -276,7 +302,9 @@ export function ProfileForm() {
               <FormControl>
                 <Input type='color' className='h-10 w-16' {...field} />
               </FormControl>
-              <FormDescription>Accent color used to identify you.</FormDescription>
+              <FormDescription>
+                Accent color used to identify you.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}

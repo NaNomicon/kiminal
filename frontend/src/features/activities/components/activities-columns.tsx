@@ -81,7 +81,13 @@ export const activitiesColumns = (
       const visible = row.getValue('visible') as boolean
       return (
         <div className='flex space-x-2'>
-          <Badge variant='outline' className={cn('capitalize', visibleBadge[String(visible) as 'true' | 'false'])}>
+          <Badge
+            variant='outline'
+            className={cn(
+              'capitalize',
+              visibleBadge[String(visible) as 'true' | 'false']
+            )}
+          >
             {visible ? 'Yes' : 'No'}
           </Badge>
         </div>

@@ -61,39 +61,68 @@ export const timesheetsColumns: ColumnDef<Timesheet>[] = [
     ),
     cell: ({ row }) => {
       const end = row.getValue('end') as string | null
-      return <div className='text-nowrap'>{end ? new Date(end).toLocaleString() : '-'}</div>
+      return (
+        <div className='text-nowrap'>
+          {end ? new Date(end).toLocaleString() : '-'}
+        </div>
+      )
     },
   },
   {
     id: 'customer',
     accessorFn: (row) => {
       const project = row.project
-      return typeof project === 'object' && project !== null ? (project.customer as unknown as { name?: string })?.name : undefined
+      return typeof project === 'object' && project !== null
+        ? (project.customer as unknown as { name?: string })?.name
+        : undefined
     },
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Customer' />
     ),
     cell: ({ row }) => {
       const project = row.original.project
-      const name = typeof project === 'object' && project !== null ? (project.customer as unknown as { name?: string })?.name : undefined
+      const name =
+        typeof project === 'object' && project !== null
+          ? (project.customer as unknown as { name?: string })?.name
+          : undefined
       return <div>{name ?? '-'}</div>
     },
   },
   {
     id: 'project',
-    accessorFn: (row) => (typeof row.project === 'object' && row.project !== null ? row.project.name : undefined),
+    accessorFn: (row) =>
+      typeof row.project === 'object' && row.project !== null
+        ? row.project.name
+        : undefined,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Project' />
     ),
-    cell: ({ row }) => <div>{typeof row.original.project === 'object' && row.original.project !== null ? row.original.project.name : '-'}</div>,
+    cell: ({ row }) => (
+      <div>
+        {typeof row.original.project === 'object' &&
+        row.original.project !== null
+          ? row.original.project.name
+          : '-'}
+      </div>
+    ),
   },
   {
     id: 'activity',
-    accessorFn: (row) => (typeof row.activity === 'object' && row.activity !== null ? row.activity.name : undefined),
+    accessorFn: (row) =>
+      typeof row.activity === 'object' && row.activity !== null
+        ? row.activity.name
+        : undefined,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Activity' />
     ),
-    cell: ({ row }) => <div>{typeof row.original.activity === 'object' && row.original.activity !== null ? row.original.activity.name : '-'}</div>,
+    cell: ({ row }) => (
+      <div>
+        {typeof row.original.activity === 'object' &&
+        row.original.activity !== null
+          ? row.original.activity.name
+          : '-'}
+      </div>
+    ),
   },
   {
     id: 'tags',
@@ -125,7 +154,11 @@ export const timesheetsColumns: ColumnDef<Timesheet>[] = [
       if (duration === null) return <div>-</div>
       const hours = Math.floor(duration / 3600)
       const minutes = Math.floor((duration % 3600) / 60)
-      return <div className='text-nowrap'>{hours}h {minutes}m</div>
+      return (
+        <div className='text-nowrap'>
+          {hours}h {minutes}m
+        </div>
+      )
     },
   },
   {
@@ -141,7 +174,9 @@ export const timesheetsColumns: ColumnDef<Timesheet>[] = [
       <DataTableColumnHeader column={column} title='Description' />
     ),
     cell: ({ row }) => (
-      <LongText className='max-w-36'>{row.getValue('description') ?? '-'}</LongText>
+      <LongText className='max-w-36'>
+        {row.getValue('description') ?? '-'}
+      </LongText>
     ),
   },
   {
@@ -153,7 +188,13 @@ export const timesheetsColumns: ColumnDef<Timesheet>[] = [
       const billable = row.getValue('billable') as boolean
       return (
         <div className='flex space-x-2'>
-          <Badge variant='outline' className={cn('capitalize', billableBadge[String(billable) as 'true' | 'false'])}>
+          <Badge
+            variant='outline'
+            className={cn(
+              'capitalize',
+              billableBadge[String(billable) as 'true' | 'false']
+            )}
+          >
             {billable ? 'Yes' : 'No'}
           </Badge>
         </div>
@@ -170,7 +211,13 @@ export const timesheetsColumns: ColumnDef<Timesheet>[] = [
       const exported = row.getValue('exported') as boolean
       return (
         <div className='flex space-x-2'>
-          <Badge variant='outline' className={cn('capitalize', exportedBadge[String(exported) as 'true' | 'false'])}>
+          <Badge
+            variant='outline'
+            className={cn(
+              'capitalize',
+              exportedBadge[String(exported) as 'true' | 'false']
+            )}
+          >
             {exported ? 'Yes' : 'No'}
           </Badge>
         </div>

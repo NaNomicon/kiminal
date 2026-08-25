@@ -7,8 +7,8 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { cn } from '@/lib/utils'
 import { activitiesApi, projectsApi } from '@/lib/api'
+import { cn } from '@/lib/utils'
 import { type NavigateFn, useTableUrlState } from '@/hooks/use-table-url-state'
 import {
   Table,
@@ -19,8 +19,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
-import { DataTableBulkActions } from './data-table-bulk-actions'
 import { activitiesColumns } from './activities-columns'
+import { DataTableBulkActions } from './data-table-bulk-actions'
 
 type DataTableProps = {
   search: Record<string, unknown>
@@ -50,8 +50,7 @@ export function ActivitiesTable({ search, navigate }: DataTableProps) {
   })
 
   const projectFilter = columnFilters.find((f) => f.id === 'project')?.value as
-    | number[]
-    | undefined
+    number[] | undefined
 
   const orderBy = sorting[0]?.id
   const order = sorting[0]?.desc ? 'DESC' : 'ASC'
@@ -67,7 +66,15 @@ export function ActivitiesTable({ search, navigate }: DataTableProps) {
   const columns = activitiesColumns(projectNames)
 
   const { data: page, isFetching } = useQuery({
-    queryKey: ['activities', pagination.pageIndex, pagination.pageSize, globalFilter, projectFilter, orderBy, order],
+    queryKey: [
+      'activities',
+      pagination.pageIndex,
+      pagination.pageSize,
+      globalFilter,
+      projectFilter,
+      orderBy,
+      order,
+    ],
     queryFn: () =>
       activitiesApi.list({
         page: pagination.pageIndex + 1,

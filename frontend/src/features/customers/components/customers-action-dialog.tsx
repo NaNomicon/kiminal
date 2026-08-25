@@ -112,9 +112,13 @@ export function CustomersActionDialog({
     >
       <DialogContent className='sm:max-w-lg'>
         <DialogHeader className='text-start'>
-          <DialogTitle>{isEdit ? 'Edit Customer' : 'Add New Customer'}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? 'Edit Customer' : 'Add New Customer'}
+          </DialogTitle>
           <DialogDescription>
-            {isEdit ? 'Update the customer here. ' : 'Create new customer here. '}
+            {isEdit
+              ? 'Update the customer here. '
+              : 'Create new customer here. '}
             Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
@@ -148,7 +152,9 @@ export function CustomersActionDialog({
                 name='number'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Number</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Number
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder='C-001'
@@ -166,7 +172,9 @@ export function CustomersActionDialog({
                 name='company'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Company</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Company
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder='Acme Corp'
@@ -203,7 +211,9 @@ export function CustomersActionDialog({
                 name='country'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Country</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Country
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder='US'
@@ -221,7 +231,9 @@ export function CustomersActionDialog({
                 name='currency'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Currency</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Currency
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder='USD'
@@ -257,7 +269,9 @@ export function CustomersActionDialog({
                 name='comment'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Comment</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Comment
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder='Notes'
@@ -275,7 +289,9 @@ export function CustomersActionDialog({
                 name='visible'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Visible</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Visible
+                    </FormLabel>
                     <FormControl>
                       <Switch
                         checked={field.value}
@@ -292,7 +308,9 @@ export function CustomersActionDialog({
                 name='billable'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Billable</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Billable
+                    </FormLabel>
                     <FormControl>
                       <Switch
                         checked={field.value}
@@ -308,7 +326,11 @@ export function CustomersActionDialog({
           </Form>
         </div>
         <DialogFooter>
-          <Button type='submit' form='customer-form' disabled={mutation.isPending}>
+          <Button
+            type='submit'
+            form='customer-form'
+            disabled={mutation.isPending}
+          >
             Save changes
           </Button>
         </DialogFooter>

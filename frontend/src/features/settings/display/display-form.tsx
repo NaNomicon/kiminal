@@ -2,9 +2,10 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { usersApi, configApi } from '@/lib/api'
-import { prefValue } from '@/lib/preferences'
-import { WEEKDAYS } from '@/lib/i18n'
 import { handleServerError } from '@/lib/handle-server-error'
+import { WEEKDAYS } from '@/lib/i18n'
+import { prefValue } from '@/lib/preferences'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -13,13 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableRow,
-} from '@/components/ui/table'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
 
 export function DisplayForm() {
   const { data: user, isPending: userPending } = useQuery({
@@ -34,7 +29,9 @@ export function DisplayForm() {
 
   const saveWeekday = useMutation({
     mutationFn: (firstWeekday: string) =>
-      usersApi.patchPreferences(user!.id, [{ name: 'first_weekday', value: firstWeekday }]),
+      usersApi.patchPreferences(user!.id, [
+        { name: 'first_weekday', value: firstWeekday },
+      ]),
     onSuccess: () => toast.success('First weekday saved.'),
     onError: handleServerError,
   })
@@ -102,23 +99,37 @@ export function DisplayForm() {
             <TableBody>
               <TableRow>
                 <TableCell className='font-medium'>Tracking mode</TableCell>
-                <TableCell className='capitalize'>{timesheetConfig.trackingMode}</TableCell>
+                <TableCell className='capitalize'>
+                  {timesheetConfig.trackingMode}
+                </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell className='font-medium'>Default begin time</TableCell>
+                <TableCell className='font-medium'>
+                  Default begin time
+                </TableCell>
                 <TableCell>{timesheetConfig.defaultBeginTime}</TableCell>
               </TableRow>
               <TableRow>
-                <TableCell className='font-medium'>Active entries hard limit</TableCell>
+                <TableCell className='font-medium'>
+                  Active entries hard limit
+                </TableCell>
                 <TableCell>{timesheetConfig.activeEntriesHardLimit}</TableCell>
               </TableRow>
               <TableRow>
-                <TableCell className='font-medium'>Allow future times</TableCell>
-                <TableCell>{timesheetConfig.isAllowFutureTimes ? 'Yes' : 'No'}</TableCell>
+                <TableCell className='font-medium'>
+                  Allow future times
+                </TableCell>
+                <TableCell>
+                  {timesheetConfig.isAllowFutureTimes ? 'Yes' : 'No'}
+                </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell className='font-medium'>Allow overlapping entries</TableCell>
-                <TableCell>{timesheetConfig.isAllowOverlapping ? 'Yes' : 'No'}</TableCell>
+                <TableCell className='font-medium'>
+                  Allow overlapping entries
+                </TableCell>
+                <TableCell>
+                  {timesheetConfig.isAllowOverlapping ? 'Yes' : 'No'}
+                </TableCell>
               </TableRow>
             </TableBody>
           </Table>

@@ -71,9 +71,7 @@ export function UsersActionDialog({
 
   const mutation = useMutation({
     mutationFn: (values: UserForm) =>
-      isEdit
-        ? usersApi.update(currentRow.id, values)
-        : usersApi.create(values),
+      isEdit ? usersApi.update(currentRow.id, values) : usersApi.create(values),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] })
       toast.success(isEdit ? 'User updated.' : 'User created.')
@@ -115,7 +113,9 @@ export function UsersActionDialog({
                 name='username'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Username</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Username
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder='john_doe'
@@ -170,7 +170,9 @@ export function UsersActionDialog({
                 name='accountNumber'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Account Number</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Account Number
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder='A-001'
@@ -188,7 +190,9 @@ export function UsersActionDialog({
                 name='enabled'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Enabled</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Enabled
+                    </FormLabel>
                     <FormControl>
                       <Switch
                         checked={field.value}

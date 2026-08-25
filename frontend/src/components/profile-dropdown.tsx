@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
-import useDialogState from '@/hooks/use-dialog-state'
 import { usersApi } from '@/lib/api'
+import useDialogState from '@/hooks/use-dialog-state'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -49,19 +49,13 @@ export function ProfileDropdown() {
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
-              <Link to='/settings'>
-                Profile
-              </Link>
+              <Link to='/settings'>Profile</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to='/settings/account'>
-                Account
-              </Link>
+              <Link to='/settings/account'>Account</Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link to='/settings/notifications'>
-                Notifications
-              </Link>
+              <Link to='/settings/notifications'>Notifications</Link>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />

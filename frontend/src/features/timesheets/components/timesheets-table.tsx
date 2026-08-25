@@ -7,8 +7,14 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import {
+  activitiesApi,
+  customersApi,
+  projectsApi,
+  tagsApi,
+  timesheetsApi,
+} from '@/lib/api'
 import { cn } from '@/lib/utils'
-import { activitiesApi, customersApi, projectsApi, tagsApi, timesheetsApi } from '@/lib/api'
 import { type NavigateFn, useTableUrlState } from '@/hooks/use-table-url-state'
 import {
   Table,
@@ -85,7 +91,20 @@ export function TimesheetsTable({ search, navigate }: DataTableProps) {
   })
 
   const { data: page, isFetching } = useQuery({
-    queryKey: ['timesheets', pagination.pageIndex, pagination.pageSize, globalFilter, customerFilter, projectFilter, activityFilter, tagsFilter, exportedFilter, billableFilter, orderBy, order],
+    queryKey: [
+      'timesheets',
+      pagination.pageIndex,
+      pagination.pageSize,
+      globalFilter,
+      customerFilter,
+      projectFilter,
+      activityFilter,
+      tagsFilter,
+      exportedFilter,
+      billableFilter,
+      orderBy,
+      order,
+    ],
     queryFn: () =>
       timesheetsApi.list({
         page: pagination.pageIndex + 1,

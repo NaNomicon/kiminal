@@ -105,7 +105,9 @@ export function ProjectsActionDialog({
     >
       <DialogContent className='sm:max-w-lg'>
         <DialogHeader className='text-start'>
-          <DialogTitle>{isEdit ? 'Edit Project' : 'Add New Project'}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? 'Edit Project' : 'Add New Project'}
+          </DialogTitle>
           <DialogDescription>
             {isEdit ? 'Update the project here. ' : 'Create new project here. '}
             Click save when you&apos;re done.
@@ -141,9 +143,13 @@ export function ProjectsActionDialog({
                 name='customer'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Customer</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Customer
+                    </FormLabel>
                     <SelectDropdown
-                      defaultValue={field.value ? String(field.value) : undefined}
+                      defaultValue={
+                        field.value ? String(field.value) : undefined
+                      }
                       onValueChange={(v) => field.onChange(Number(v))}
                       placeholder='Select a customer'
                       className='col-span-4'
@@ -161,7 +167,9 @@ export function ProjectsActionDialog({
                 name='orderNumber'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Order Number</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Order Number
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder='PO-1234'
@@ -179,7 +187,9 @@ export function ProjectsActionDialog({
                 name='comment'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Comment</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Comment
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder='Notes'
@@ -197,7 +207,9 @@ export function ProjectsActionDialog({
                 name='visible'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Visible</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Visible
+                    </FormLabel>
                     <FormControl>
                       <Switch
                         checked={field.value}
@@ -214,7 +226,9 @@ export function ProjectsActionDialog({
                 name='billable'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Billable</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Billable
+                    </FormLabel>
                     <FormControl>
                       <Switch
                         checked={field.value}
@@ -230,7 +244,11 @@ export function ProjectsActionDialog({
           </Form>
         </div>
         <DialogFooter>
-          <Button type='submit' form='project-form' disabled={mutation.isPending}>
+          <Button
+            type='submit'
+            form='project-form'
+            disabled={mutation.isPending}
+          >
             Save changes
           </Button>
         </DialogFooter>

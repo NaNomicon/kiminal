@@ -1,8 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { type Table } from '@tanstack/react-table'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { type Table } from '@tanstack/react-table'
 import { AlertTriangle } from 'lucide-react'
 import { toast } from 'sonner'
 import { timesheetsApi } from '@/lib/api'
@@ -35,10 +35,14 @@ export function TimesheetsMultiDeleteDialog<TData>({
 
   const mutation = useMutation({
     mutationFn: () =>
-      Promise.all(selectedRows.map((row) => timesheetsApi.delete(row.original.id))),
+      Promise.all(
+        selectedRows.map((row) => timesheetsApi.delete(row.original.id))
+      ),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['timesheets'] })
-      toast.success(`Deleted ${selectedRows.length} timesheet${selectedRows.length > 1 ? 's' : ''}.`)
+      toast.success(
+        `Deleted ${selectedRows.length} timesheet${selectedRows.length > 1 ? 's' : ''}.`
+      )
       setValue('')
       table.resetRowSelection()
       onOpenChange(false)

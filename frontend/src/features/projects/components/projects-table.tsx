@@ -7,8 +7,8 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { cn } from '@/lib/utils'
 import { customersApi, projectsApi } from '@/lib/api'
+import { cn } from '@/lib/utils'
 import { type NavigateFn, useTableUrlState } from '@/hooks/use-table-url-state'
 import {
   Table,
@@ -49,9 +49,8 @@ export function ProjectsTable({ search, navigate }: DataTableProps) {
     ],
   })
 
-  const customerFilter = columnFilters.find((f) => f.id === 'customer')?.value as
-    | number[]
-    | undefined
+  const customerFilter = columnFilters.find((f) => f.id === 'customer')
+    ?.value as number[] | undefined
 
   const orderBy = sorting[0]?.id
   const order = sorting[0]?.desc ? 'DESC' : 'ASC'
@@ -67,7 +66,15 @@ export function ProjectsTable({ search, navigate }: DataTableProps) {
   const columns = projectsColumns(customerNames)
 
   const { data: page, isFetching } = useQuery({
-    queryKey: ['projects', pagination.pageIndex, pagination.pageSize, globalFilter, customerFilter, orderBy, order],
+    queryKey: [
+      'projects',
+      pagination.pageIndex,
+      pagination.pageSize,
+      globalFilter,
+      customerFilter,
+      orderBy,
+      order,
+    ],
     queryFn: () =>
       projectsApi.list({
         page: pagination.pageIndex + 1,

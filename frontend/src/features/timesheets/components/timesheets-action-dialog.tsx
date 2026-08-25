@@ -74,8 +74,10 @@ export function TimesheetsActionDialog({
       ? {
           begin: toLocalInput(currentRow.begin),
           end: toLocalInput(currentRow.end),
-          project: typeof currentRow.project === 'number' ? currentRow.project : 0,
-          activity: typeof currentRow.activity === 'number' ? currentRow.activity : 0,
+          project:
+            typeof currentRow.project === 'number' ? currentRow.project : 0,
+          activity:
+            typeof currentRow.activity === 'number' ? currentRow.activity : 0,
           description: currentRow.description ?? '',
           billable: currentRow.billable,
           exported: currentRow.exported,
@@ -129,9 +131,13 @@ export function TimesheetsActionDialog({
     >
       <DialogContent className='sm:max-w-lg'>
         <DialogHeader className='text-start'>
-          <DialogTitle>{isEdit ? 'Edit Timesheet' : 'Add New Timesheet'}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? 'Edit Timesheet' : 'Add New Timesheet'}
+          </DialogTitle>
           <DialogDescription>
-            {isEdit ? 'Update the timesheet here. ' : 'Create new timesheet here. '}
+            {isEdit
+              ? 'Update the timesheet here. '
+              : 'Create new timesheet here. '}
             Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
@@ -181,9 +187,13 @@ export function TimesheetsActionDialog({
                 name='project'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Project</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Project
+                    </FormLabel>
                     <SelectDropdown
-                      defaultValue={field.value ? String(field.value) : undefined}
+                      defaultValue={
+                        field.value ? String(field.value) : undefined
+                      }
                       onValueChange={(v) => field.onChange(Number(v))}
                       placeholder='Select a project'
                       className='col-span-4'
@@ -201,9 +211,13 @@ export function TimesheetsActionDialog({
                 name='activity'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Activity</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Activity
+                    </FormLabel>
                     <SelectDropdown
-                      defaultValue={field.value ? String(field.value) : undefined}
+                      defaultValue={
+                        field.value ? String(field.value) : undefined
+                      }
                       onValueChange={(v) => field.onChange(Number(v))}
                       placeholder='Select an activity'
                       className='col-span-4'
@@ -221,7 +235,9 @@ export function TimesheetsActionDialog({
                 name='description'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Description</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Description
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder='What did you work on?'
@@ -239,7 +255,9 @@ export function TimesheetsActionDialog({
                 name='billable'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Billable</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Billable
+                    </FormLabel>
                     <FormControl>
                       <Switch
                         checked={field.value}
@@ -256,7 +274,9 @@ export function TimesheetsActionDialog({
                 name='exported'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Exported</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Exported
+                    </FormLabel>
                     <FormControl>
                       <Switch
                         checked={field.value}
@@ -272,7 +292,11 @@ export function TimesheetsActionDialog({
           </Form>
         </div>
         <DialogFooter>
-          <Button type='submit' form='timesheet-form' disabled={mutation.isPending}>
+          <Button
+            type='submit'
+            form='timesheet-form'
+            disabled={mutation.isPending}
+          >
             Save changes
           </Button>
         </DialogFooter>

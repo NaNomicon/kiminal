@@ -102,9 +102,13 @@ export function ActivitiesActionDialog({
     >
       <DialogContent className='sm:max-w-lg'>
         <DialogHeader className='text-start'>
-          <DialogTitle>{isEdit ? 'Edit Activity' : 'Add New Activity'}</DialogTitle>
+          <DialogTitle>
+            {isEdit ? 'Edit Activity' : 'Add New Activity'}
+          </DialogTitle>
           <DialogDescription>
-            {isEdit ? 'Update the activity here. ' : 'Create new activity here. '}
+            {isEdit
+              ? 'Update the activity here. '
+              : 'Create new activity here. '}
             Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
@@ -138,9 +142,13 @@ export function ActivitiesActionDialog({
                 name='project'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Project</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Project
+                    </FormLabel>
                     <SelectDropdown
-                      defaultValue={field.value ? String(field.value) : undefined}
+                      defaultValue={
+                        field.value ? String(field.value) : undefined
+                      }
                       onValueChange={(v) => field.onChange(Number(v))}
                       placeholder='Select a project'
                       className='col-span-4'
@@ -158,7 +166,9 @@ export function ActivitiesActionDialog({
                 name='comment'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Comment</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Comment
+                    </FormLabel>
                     <FormControl>
                       <Input
                         placeholder='Notes'
@@ -176,7 +186,9 @@ export function ActivitiesActionDialog({
                 name='visible'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Visible</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Visible
+                    </FormLabel>
                     <FormControl>
                       <Switch
                         checked={field.value}
@@ -193,7 +205,9 @@ export function ActivitiesActionDialog({
                 name='billable'
                 render={({ field }) => (
                   <FormItem className='grid grid-cols-6 items-center space-y-0 gap-x-4 gap-y-1'>
-                    <FormLabel className='col-span-2 text-end'>Billable</FormLabel>
+                    <FormLabel className='col-span-2 text-end'>
+                      Billable
+                    </FormLabel>
                     <FormControl>
                       <Switch
                         checked={field.value}
@@ -209,7 +223,11 @@ export function ActivitiesActionDialog({
           </Form>
         </div>
         <DialogFooter>
-          <Button type='submit' form='activity-form' disabled={mutation.isPending}>
+          <Button
+            type='submit'
+            form='activity-form'
+            disabled={mutation.isPending}
+          >
             Save changes
           </Button>
         </DialogFooter>

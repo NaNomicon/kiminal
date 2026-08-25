@@ -1,7 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
-import { Main } from '@/components/layout/main'
+import {
+  activitiesApi,
+  customersApi,
+  projectsApi,
+  timesheetsApi,
+} from '@/lib/api'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { activitiesApi, customersApi, projectsApi, timesheetsApi } from '@/lib/api'
+import { Main } from '@/components/layout/main'
 
 function startOfDay(d: Date): Date {
   const out = new Date(d)
@@ -47,7 +52,9 @@ function formatDuration(totalSeconds: number): string {
   return `${seconds}s`
 }
 
-function sumDurations(timesheets: readonly { duration: number | null }[]): number {
+function sumDurations(
+  timesheets: readonly { duration: number | null }[]
+): number {
   return timesheets.reduce((sum, ts) => sum + (ts.duration ?? 0), 0)
 }
 
@@ -104,7 +111,9 @@ function StatCard({ title, value, subtitle }: StatCardProps) {
       </CardHeader>
       <CardContent>
         <div className='text-2xl font-bold'>{value}</div>
-        {subtitle && <p className='text-xs text-muted-foreground'>{subtitle}</p>}
+        {subtitle && (
+          <p className='text-xs text-muted-foreground'>{subtitle}</p>
+        )}
       </CardContent>
     </Card>
   )
@@ -123,8 +132,13 @@ function WeekBars({ totalSecondsByDay }: { totalSecondsByDay: number[] }) {
         const height = `${Math.round((seconds / max) * 100)}%`
         const hours = formatDuration(seconds)
         return (
-          <div key={i} className='flex flex-1 flex-col items-center justify-end gap-1'>
-            <div className='text-xs text-muted-foreground'>{formatDuration(seconds)}</div>
+          <div
+            key={i}
+            className='flex flex-1 flex-col items-center justify-end gap-1'
+          >
+            <div className='text-xs text-muted-foreground'>
+              {formatDuration(seconds)}
+            </div>
             <div
               className='w-full rounded-md bg-primary/80'
               style={{ height: height === '0%' ? '2px' : height }}
@@ -145,15 +159,18 @@ export function Dashboard() {
   const yearStart = startOfYear(now)
   const period = usePeriodTimesheets(yearStart)
   const timesheets = period.data?.data ?? []
-  const truncated = (period.data?.total ?? timesheets.length) > timesheets.length
+  const truncated =
+    (period.data?.total ?? timesheets.length) > timesheets.length
 
   const { customers, projects, activities } = useCounts()
 
   const totalFor = (from: Date, to: Date) =>
-    sumDurations(timesheets.filter((ts) => {
-      const b = new Date(ts.begin)
-      return b >= from && b <= to
-    }))
+    sumDurations(
+      timesheets.filter((ts) => {
+        const b = new Date(ts.begin)
+        return b >= from && b <= to
+      })
+    )
 
   const today = totalFor(startOfDay(now), now)
   const week = totalFor(startOfWeek(now), now)
@@ -165,7 +182,9 @@ export function Dashboard() {
   for (const ts of timesheets) {
     const b = new Date(ts.begin)
     if (b < weekAgoStart || b > now) continue
-    const idx = Math.floor((startOfDay(b).getTime() - weekAgoStart.getTime()) / 86400000)
+    const idx = Math.floor(
+      (startOfDay(b).getTime() - weekAgoStart.getTime()) / 86400000
+    )
     if (idx >= 0 && idx < 7) last7[idx] += ts.duration ?? 0
   }
 
@@ -179,9 +198,7 @@ export function Dashboard() {
     <Main className='flex flex-1 flex-col gap-4 sm:gap-6'>
       <div>
         <h2 className='text-2xl font-bold tracking-tight'>Dashboard</h2>
-        <p className='text-muted-foreground'>
-          Your time tracking at a glance.
-        </p>
+        <p className='text-muted-foreground'>Your time tracking at a glance.</p>
         {truncated && (
           <p className='mt-1 text-xs text-muted-foreground'>
             Showing the latest {timesheets.length} of {period.data?.total}{' '}

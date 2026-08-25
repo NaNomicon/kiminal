@@ -4,6 +4,7 @@ import { Copy, Loader2, Plus, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { usersApi, type AccessToken, type AccessTokenList } from '@/lib/api'
 import { handleServerError } from '@/lib/handle-server-error'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -15,7 +16,6 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 export function AccountForm() {
   const queryClient = useQueryClient()
@@ -41,8 +41,9 @@ export function AccountForm() {
     mutationFn: (id: number) => usersApi.deleteToken(id),
     onSuccess: (_data, id) => {
       toast.success('Token revoked.')
-      queryClient.setQueryData<AccessTokenList[]>(['users', 'api-token'], (old) =>
-        old ? old.filter((t) => t.id !== id) : old
+      queryClient.setQueryData<AccessTokenList[]>(
+        ['users', 'api-token'],
+        (old) => (old ? old.filter((t) => t.id !== id) : old)
       )
     },
     onError: handleServerError,
@@ -74,13 +75,18 @@ export function AccountForm() {
             <AlertTitle>Copy your token now</AlertTitle>
             <AlertDescription className='space-y-3'>
               <p>
-                This is the only time the raw token is shown. Store it
-                securely — you cannot retrieve it again.
+                This is the only time the raw token is shown. Store it securely
+                — you cannot retrieve it again.
               </p>
-              <code className='block break-all rounded border bg-muted px-3 py-2 text-sm'>
+              <code className='block rounded border bg-muted px-3 py-2 text-sm break-all'>
                 {createdToken.token}
               </code>
-              <Button type='button' variant='outline' size='sm' onClick={copyToken}>
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                onClick={copyToken}
+              >
                 <Copy className='me-2 size-4' />
                 Copy token
               </Button>
@@ -139,7 +145,9 @@ export function AccountForm() {
             <TableBody>
               {tokens.map((token) => (
                 <TableRow key={token.id}>
-                  <TableCell className='font-medium'>{token.name || '—'}</TableCell>
+                  <TableCell className='font-medium'>
+                    {token.name || '—'}
+                  </TableCell>
                   <TableCell className='text-muted-foreground'>
                     {token.lastUsage
                       ? new Date(token.lastUsage).toLocaleString()

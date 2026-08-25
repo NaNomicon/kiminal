@@ -117,7 +117,7 @@ jobs:
                 with:
                     token: ${{ secrets.CODECOV_TOKEN }}
                     files: ./coverage.xml
-                    fail_ci_if_error: false
+                    fail_ci_if_error: ${{ secrets.CODECOV_TOKEN != '' }}
 
             -   name: Run migrations on MySQL
                 run: |

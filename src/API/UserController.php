@@ -9,6 +9,8 @@
 
 namespace App\API;
 
+use App\API\Model\AccessToken as AccessTokenModel;
+use App\API\Model\AccessTokenList as AccessTokenListModel;
 use App\Entity\AccessToken;
 use App\Entity\Role;
 use App\Entity\User;
@@ -32,6 +34,7 @@ use Psr\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
@@ -48,6 +51,7 @@ final class UserController extends BaseApiController
     public function __construct(
         private readonly ViewHandlerInterface $viewHandler,
         private readonly UserRepository $repository,
+        private readonly RateLimiterFactory $apiTokenMintLimiter,
     ) {
     }
 
@@ -226,6 +230,98 @@ final class UserController extends BaseApiController
         $roleRepository->deleteRole($role);
 
         return $this->viewHandler->handle(new View(null, Response::HTTP_NO_CONTENT));
+    }
+
+    /**
+     * Create API token for a user
+     *
+     * Creates a new API token for the given user and returns the raw token once.
+     * Requires the caller to have access to API tokens for the target user.
+     */
+    #[OA\Post(description: 'Creates a new API token for the given user and returns the raw token once', responses: [new OA\Response(response: 201, description: 'Returns the created API token', content: new OA\JsonContent(ref: '#/components/schemas/AccessToken'))])]
+    #[OA\Parameter(name: 'id', in: 'path', description: 'The user to create the token for', required: true)]
+    #[OA\RequestBody(required: false, content: new OA\JsonContent(properties: [new OA\Property(property: 'name', description: 'Optional token name', type: 'string')]))]
+    #[Route(methods: ['POST'], path: '/{id}/api-token', name: 'create_user_api_token', requirements: ['id' => '\d+'])]
+    public function createUserApiToken(User $profile, Request $request, AccessTokenRepository $accessTokenRepository): Response
+    {
+        if (!$this->isGranted('api-token', $profile)) {
+            throw $this->createAccessDeniedException('User has no access to API tokens');
+        }
+
+        $limiter = $this->apiTokenMintLimiter->create($request->getClientIp());
+        if (false === $limiter->consume()->isAccepted()) {
+            throw new BadRequestHttpException('Too many API token requests. Possible attack?');
+        }
+
+        $accessToken = new AccessToken($profile, bin2hex(random_bytes(32)));
+
+        $name = $request->request->get('name');
+        $accessToken->setName(\is_string($name) ? $name : '');
+
+        $accessTokenRepository->saveAccessToken($accessToken);
+
+        $view = new View(new AccessTokenModel($accessToken), Response::HTTP_CREATED);
+        $view->getContext()->setGroups(self::GROUPS_ENTITY);
+
+        return $this->viewHandler->handle($view);
+    }
+
+    /**
+     * Create API token
+     *
+     * Creates a new API token for the current user and returns the raw token once.
+     */
+    #[OA\Post(description: 'Creates a new API token for the current user and returns the raw token once', responses: [new OA\Response(response: 201, description: 'Returns the created API token', content: new OA\JsonContent(ref: '#/components/schemas/AccessToken'))])]
+    #[OA\RequestBody(required: false, content: new OA\JsonContent(properties: [new OA\Property(property: 'name', description: 'Optional token name', type: 'string')]))]
+    #[Route(methods: ['POST'], path: '/api-token', name: 'create_api_token')]
+    public function createApiToken(Request $request, AccessTokenRepository $accessTokenRepository): Response
+    {
+        $user = $this->getUser();
+        if (!$this->isGranted('api-token', $user)) {
+            throw $this->createAccessDeniedException('User has no access to API tokens');
+        }
+
+        $limiter = $this->apiTokenMintLimiter->create($request->getClientIp());
+        if (false === $limiter->consume()->isAccepted()) {
+            throw new BadRequestHttpException('Too many API token requests. Possible attack?');
+        }
+
+        $accessToken = new AccessToken($user, bin2hex(random_bytes(32)));
+
+        $name = $request->request->get('name');
+        $accessToken->setName(\is_string($name) ? $name : '');
+
+        $accessTokenRepository->saveAccessToken($accessToken);
+
+        $view = new View(new AccessTokenModel($accessToken), Response::HTTP_CREATED);
+        $view->getContext()->setGroups(self::GROUPS_ENTITY);
+
+        return $this->viewHandler->handle($view);
+    }
+
+    /**
+     * List API tokens
+     *
+     * Lists the non-secret metadata of all API tokens belonging to the current user.
+     */
+    #[OA\Get(description: 'Lists the API tokens of the current user', responses: [new OA\Response(response: 200, description: 'Returns the API tokens of the current user', content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/AccessTokenList')))])]
+    #[Route(methods: ['GET'], path: '/api-token', name: 'get_api_tokens')]
+    public function getApiTokens(AccessTokenRepository $accessTokenRepository): Response
+    {
+        $user = $this->getUser();
+        if (!$this->isGranted('api-token', $user)) {
+            throw $this->createAccessDeniedException('User has no access to API tokens');
+        }
+
+        $data = array_map(
+            static fn (AccessToken $accessToken) => new AccessTokenListModel($accessToken),
+            $accessTokenRepository->findForUser($user)
+        );
+
+        $view = new View($data, Response::HTTP_OK);
+        $view->getContext()->setGroups(self::GROUPS_ENTITY);
+
+        return $this->viewHandler->handle($view);
     }
 
     /**

@@ -209,48 +209,9 @@ final class SystemConfiguration
         return (string) $this->find('saml.title');
     }
 
-    public function getSamlProvider(): ?string
-    {
-        return $this->find('saml.provider');
-    }
-
     public function isSamlRolesResetOnLogin(): bool
     {
         return (bool) $this->find('saml.roles.resetOnLogin');
-    }
-
-    /**
-     * @return array<int, array<'saml'|'kimai', string>>
-     */
-    public function getSamlRolesMapping(): array
-    {
-        return $this->findArray('saml.roles.mapping');
-    }
-
-    /**
-     * @return array<string, array<mixed>|bool>
-     */
-    public function getSamlConnection(): array
-    {
-        return $this->findArray('saml.connection');
-    }
-
-    /**
-     * @return array<int, array<'saml'|'kimai', string>>
-     */
-    public function getSamlAttributeMapping(): array
-    {
-        return $this->findArray('saml.mapping');
-    }
-
-    public function getSamlRolesAttribute(): ?string
-    {
-        $attr = $this->find('saml.roles.attribute');
-        if (empty($attr)) {
-            return null;
-        }
-
-        return (string) $attr;
     }
 
     public function isLdapActive(): bool

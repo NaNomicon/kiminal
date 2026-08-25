@@ -15,6 +15,16 @@ framework:
             limit: 10
             interval: '1 hour'
             lock_factory: null
+        api_token_mint:
+            policy: 'fixed_window'
+            limit: 10
+            interval: '1 minute'
+            lock_factory: null
+        api_token_validation:
+            policy: 'fixed_window'
+            limit: 20
+            interval: '1 minute'
+            lock_factory: null
 
 when@test:
     framework:

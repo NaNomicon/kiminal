@@ -50,7 +50,6 @@ class RuntimeExtensionsTest extends TestCase
             'render_widget',
             'icon',
             'qr_code_data_uri',
-            'user_shortcuts',
         ];
 
         $i = 0;

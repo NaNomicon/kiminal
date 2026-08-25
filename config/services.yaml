@@ -35,12 +35,6 @@ services:
             - '../src/Kernel.php'
             - '../src/Constants.php'
 
-    # controllers are imported separately to make sure services can be injected
-    # as action arguments even if you don't extend any base controller class
-    App\Controller\:
-        resource: '../src/Controller'
-        tags: ['controller.service_arguments']
-
     # ================================================================================
     # APPLICATION CORE
     # ================================================================================
@@ -115,14 +109,6 @@ services:
         arguments:
             $permissions: '%kimai.permissions%'
             $permissionNames: '%kimai.permission_names%'
-
-    # ================================================================================
-    # SAML Services
-    # ================================================================================
-    App\Saml\SamlProvider:
-        arguments:
-            $userProvider: '@security.user.provider.concrete.kimai_internal'
-            $configuration: '@App\Configuration\SamlConfigurationInterface'
 
     # ================================================================================
     # REPOSITORIES

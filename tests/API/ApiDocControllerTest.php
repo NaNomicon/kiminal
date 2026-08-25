@@ -10,11 +10,10 @@
 namespace App\Tests\API;
 
 use App\Entity\User;
-use App\Tests\Controller\AbstractControllerBaseTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 #[Group('integration')]
-class ApiDocControllerTest extends AbstractControllerBaseTestCase
+class ApiDocControllerTest extends APIControllerBaseTestCase
 {
     public function testIsSecure(): void
     {
@@ -48,7 +47,7 @@ class ApiDocControllerTest extends AbstractControllerBaseTestCase
             }
         }
 
-        $expectedKeys = ['Actions', 'Activity', 'Dashboard', 'Default', 'Customer', 'Favorites', 'Project', 'Tag', 'Team', 'Timesheet', 'User', 'Invoice', 'Export'];
+        $expectedKeys = ['Activity', 'Dashboard', 'Default', 'Customer', 'Favorites', 'Project', 'Tag', 'Team', 'Timesheet', 'User', 'Invoice', 'Export'];
         $actual = array_keys($tags);
 
         sort($actual);
@@ -57,10 +56,6 @@ class ApiDocControllerTest extends AbstractControllerBaseTestCase
         self::assertEquals($expectedKeys, $actual, \sprintf('Expected %s sections in API docs, but found %s.', \count($actual), \count($expectedKeys)));
 
         $paths = [
-            '/api/actions/timesheet/{id}/{view}/{locale}',
-            '/api/actions/activity/{id}/{view}/{locale}',
-            '/api/actions/project/{id}/{view}/{locale}',
-            '/api/actions/customer/{id}/{view}/{locale}',
             '/api/activities',
             '/api/activities/{id}',
             '/api/activities/{id}/meta',
@@ -124,6 +119,8 @@ class ApiDocControllerTest extends AbstractControllerBaseTestCase
             '/api/users/{id}',
             '/api/users/me',
             '/api/users/roles/{id}',
+            '/api/users/{id}/api-token',
+            '/api/users/api-token',
             '/api/users/api-token/{id}',
             '/api/users/{id}/preferences',
         ];

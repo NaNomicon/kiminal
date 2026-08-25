@@ -530,4 +530,209 @@ class UserControllerTest extends APIControllerBaseTestCase
         $this->getEntityManager()->clear();
         self::assertNotNull($this->getEntityManager()->getRepository(Role::class)->find($id));
     }
+
+    // ------------------------------------- [API TOKENS] -------------------------------------
+
+    public function testGetApiTokensIsSecure(): void
+    {
+        $this->assertRequestIsSecured(self::createClient(), '/api/users/api-token', 'GET');
+    }
+
+    public function testGetApiTokens(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_USER);
+        $user = $this->getUserByRole(User::ROLE_USER);
+        $otherUser = $this->getUserByRole(User::ROLE_ADMIN);
+
+        $em = $this->getEntityManager();
+        $tokenA = new \App\Entity\AccessToken($user, 'aaaa1111aaaa1111aaaa1111a');
+        $tokenA->setName('token-a');
+        $em->persist($tokenA);
+        $tokenB = new \App\Entity\AccessToken($user, 'bbbb2222bbbb2222bbbb2222b');
+        $tokenB->setName('token-b');
+        $em->persist($tokenB);
+        $foreign = new \App\Entity\AccessToken($otherUser, 'cccc3333cccc3333cccc3333c');
+        $foreign->setName('foreign-token');
+        $em->persist($foreign);
+        $em->flush();
+
+        $this->request($client, '/api/users/api-token', 'GET');
+
+        $response = $client->getResponse();
+        self::assertEquals(Response::HTTP_OK, $response->getStatusCode());
+
+        $content = $response->getContent();
+        self::assertIsString($content);
+        $result = json_decode($content, true);
+        self::assertIsArray($result);
+
+        $names = [];
+        foreach ($result as $token) {
+            self::assertIsArray($token);
+            self::assertArrayHasKey('id', $token);
+            self::assertArrayHasKey('name', $token);
+            self::assertArrayNotHasKey('token', $token);
+            $names[] = $token['name'];
+        }
+        self::assertContains('token-a', $names);
+        self::assertContains('token-b', $names);
+        self::assertNotContains('foreign-token', $names);
+    }
+
+    public function testGetApiTokensWithoutNameReturnsEmptyName(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_USER);
+        $user = $this->getUserByRole(User::ROLE_USER);
+
+        $em = $this->getEntityManager();
+        $token = new \App\Entity\AccessToken($user, 'dddd4444dddd4444dddd4444d');
+        $token->setName('');
+        $em->persist($token);
+        $em->flush();
+
+        $this->request($client, '/api/users/api-token', 'GET');
+
+        $response = $client->getResponse();
+        self::assertEquals(Response::HTTP_OK, $response->getStatusCode());
+
+        $content = $response->getContent();
+        self::assertIsString($content);
+        $result = json_decode($content, true);
+        self::assertIsArray($result);
+
+        $emptyNameTokens = array_filter($result, static fn ($token): bool => \is_array($token) && $token['name'] === '');
+        self::assertNotEmpty($emptyNameTokens);
+        $emptyNameToken = array_values($emptyNameTokens)[0];
+        self::assertIsArray($emptyNameToken);
+        self::assertArrayHasKey('id', $emptyNameToken);
+        self::assertArrayNotHasKey('token', $emptyNameToken);
+    }
+
+    public function testCreateApiTokenIsSecure(): void
+    {
+        $this->assertRequestIsSecured(self::createClient(), '/api/users/api-token', 'POST');
+    }
+
+    public function testCreateApiToken(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_USER);
+        $this->request($client, '/api/users/api-token', 'POST', [], (string) json_encode(['name' => 'my-token']));
+
+        $response = $client->getResponse();
+        self::assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
+
+        $content = $response->getContent();
+        self::assertIsString($content);
+        $result = json_decode($content, true);
+        self::assertIsArray($result);
+        self::assertArrayHasKey('id', $result);
+        self::assertArrayHasKey('token', $result);
+        self::assertArrayHasKey('name', $result);
+        self::assertEquals('my-token', $result['name']);
+        self::assertEquals(64, \strlen($result['token']));
+        self::assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $result['token']);
+    }
+
+    public function testCreateApiTokenWithoutName(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_USER);
+        $this->request($client, '/api/users/api-token', 'POST');
+
+        $response = $client->getResponse();
+        self::assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
+
+        $content = $response->getContent();
+        self::assertIsString($content);
+        $result = json_decode($content, true);
+        self::assertIsArray($result);
+        self::assertArrayHasKey('token', $result);
+        self::assertEquals(64, \strlen($result['token']));
+        self::assertArrayHasKey('name', $result);
+        self::assertEquals('', $result['name']);
+    }
+
+    public function testCreateUserApiTokenIsSecure(): void
+    {
+        $this->assertUrlIsSecured('/api/users/1/api-token', 'POST');
+    }
+
+    public function testCreateUserApiTokenAsSuperAdmin(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_SUPER_ADMIN);
+        $user = $this->getUserByRole(User::ROLE_USER);
+
+        $this->request($client, '/api/users/' . $user->getId() . '/api-token', 'POST', [], (string) json_encode(['name' => 'provisioned']));
+
+        $response = $client->getResponse();
+        self::assertEquals(Response::HTTP_CREATED, $response->getStatusCode());
+
+        $content = $response->getContent();
+        self::assertIsString($content);
+        $result = json_decode($content, true);
+        self::assertIsArray($result);
+        self::assertArrayHasKey('token', $result);
+        self::assertArrayHasKey('name', $result);
+        self::assertEquals('provisioned', $result['name']);
+        self::assertEquals(64, \strlen($result['token']));
+    }
+
+    public function testCreateUserApiTokenAsAdminDenied(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_ADMIN);
+        $user = $this->getUserByRole(User::ROLE_USER);
+
+        $this->request($client, '/api/users/' . $user->getId() . '/api-token', 'POST', [], (string) json_encode(['name' => 'provisioned']));
+
+        $this->assertApiException($client->getResponse(), [
+            'code' => Response::HTTP_FORBIDDEN,
+            'message' => 'Forbidden',
+        ]);
+    }
+
+    public function testDeleteApiTokenIsSecure(): void
+    {
+        $this->assertUrlIsSecured('/api/users/api-token/1', 'DELETE');
+    }
+
+    public function testDeleteApiToken(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_USER);
+        $user = $this->getUserByRole(User::ROLE_USER);
+
+        $em = $this->getEntityManager();
+        $token = new \App\Entity\AccessToken($user, 'eeee5555eeee5555eeee5555e');
+        $token->setName('to-delete');
+        $em->persist($token);
+        $em->flush();
+        $tokenId = $token->getId();
+
+        $this->request($client, '/api/users/api-token/' . $tokenId, 'DELETE');
+
+        $response = $client->getResponse();
+        self::assertEquals(Response::HTTP_OK, $response->getStatusCode());
+
+        $em->clear();
+        self::assertNull($em->getRepository(\App\Entity\AccessToken::class)->find($tokenId));
+    }
+
+    public function testDeleteApiTokenDeniedForForeignToken(): void
+    {
+        $client = $this->getClientForAuthenticatedUser(User::ROLE_USER);
+        $otherUser = $this->getUserByRole(User::ROLE_ADMIN);
+
+        $em = $this->getEntityManager();
+        $token = new \App\Entity\AccessToken($otherUser, 'ffff6666ffff6666ffff6666f');
+        $token->setName('foreign');
+        $em->persist($token);
+        $em->flush();
+
+        $this->request($client, '/api/users/api-token/' . $token->getId(), 'DELETE');
+
+        $this->assertApiException($client->getResponse(), [
+            'code' => Response::HTTP_FORBIDDEN,
+            'message' => 'Forbidden',
+        ]);
+
+        self::assertNotNull($em->getRepository(\App\Entity\AccessToken::class)->find($token->getId()));
+    }
 }

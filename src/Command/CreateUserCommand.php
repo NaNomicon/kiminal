@@ -9,7 +9,9 @@
 
 namespace App\Command;
 
+use App\Entity\AccessToken;
 use App\Entity\User;
+use App\Repository\AccessTokenRepository;
 use App\User\UserService;
 use App\Validator\ValidationFailedException;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -23,8 +25,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 #[AsCommand(name: 'kimai:user:create', description: 'Create a new user')]
 final class CreateUserCommand extends AbstractUserCommand
 {
-    public function __construct(private UserService $userService)
-    {
+    public function __construct(
+        private UserService $userService,
+        private AccessTokenRepository $accessTokenRepository
+    ) {
         parent::__construct();
     }
 
@@ -44,6 +48,7 @@ final class CreateUserCommand extends AbstractUserCommand
             )
             ->addArgument('password', InputArgument::OPTIONAL, 'Password for the new user (requested if not provided)')
             ->addOption('request-password', null, InputOption::VALUE_NONE, 'The user needs to set a new password during next login')
+            ->addOption('api-token', null, InputOption::VALUE_REQUIRED, 'Generate an API token for the new user with the given name (Kiminal has no web login; use this to bootstrap the first user)')
         ;
     }
 
@@ -74,8 +79,19 @@ final class CreateUserCommand extends AbstractUserCommand
             $user->setRequiresPasswordReset(true);
         }
 
+        $apiTokenName = $input->getOption('api-token');
+
         try {
             $this->userService->saveUser($user);
+
+            if (\is_string($apiTokenName)) {
+                $token = bin2hex(random_bytes(32));
+                $accessToken = new AccessToken($user, $token);
+                $accessToken->setName($apiTokenName);
+                $this->accessTokenRepository->saveAccessToken($accessToken);
+                $io->writeln(\sprintf('API token (%s): %s', $apiTokenName, $token));
+            }
+
             $io->success(\sprintf('Success! Created user: %s', $username));
         } catch (ValidationFailedException $ex) {
             $this->validationError($ex, $io);

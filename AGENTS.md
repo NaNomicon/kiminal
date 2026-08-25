@@ -1,130 +1,94 @@
-# Kimai Core Agent Guide
+# Kiminal Agent Guide
 
-Use this file when working in the Kimai core repository.
+Use this file when working in the **kiminal** repository.
+
+## What kiminal is
+
+Kiminal replaces Kimai's stock Bootstrap/Twig UI with a **shadcn/Tailwind SPA** (`frontend/`, React 19 + TanStack). It is forked from [Kimai](https://github.com/kimai/kimai) into a standalone public repo (`NaNomicon/kiminal`, AGPL-3.0).
+
+**Backend strategy — migrating off PHP.** The current backend is Kimai PHP (Symfony 6.4, Doctrine, REST API in `src/API/`). We are **incrementally replacing it with a TypeScript backend**. The chosen framework is **TanStack Start** (same stack as the SPA). The old PHP backend stays running and serves every route that has not yet been ported; new routes are re-implemented in the TS backend over time. See `docs/ROADMAP.md`.
+
+**Porting rule:** when touching an existing API route, port it to the TS backend (TanStack Start) in the same change. Do not add or extend PHP API routes. New API routes are built in the TS backend from the start. **New/ported routes are fully RESTful** — correct verbs, resource-oriented, standard `200/201/204/4xx`, `Location`/collection conventions — and do not carry over Kimai's non-REST quirks (e.g. `PATCH /stop`).
+
+- **Upstream:** `upstream` remote = `https://github.com/kimai/kimai` (pull security/feature updates). `origin` = kiminal (ours).
+- **Roadmap:** `README.md` + `docs/ROADMAP.md`.
 
 ## Stack
 
-- Kimai is a professional open source time-tracking application
-- PHP versions: 8.2, 8.3, 8.4, 8.5
-- Main framework: Symfony 6.4
-- Core libraries: Doctrine, Twig
-- API libraries: FOSRestBundle, NelmioApiDocBundle
-- Frontend: Bootstrap with Tabler.io
-- Frontend build: Webpack Encore via `symfony/webpack-encore`
-- Package managers: Composer and pnpm
-- Tests: PHPUnit
-- Code styles: PhpCsFixer
-- Static analysis: PHPStan
-- Project information in README.md
-- Translations managed with Weblate online service
+- **Backend (legacy, being replaced):** Kimai PHP — Symfony 6.4, Doctrine, Twig, PHP 8.2–8.5. REST API in `src/API/`. Do not add PHP API routes.
+- **Backend (new):** TanStack Start — TypeScript, server routes, **ORM (Prisma or Drizzle) against the same `kimai2_*` DB schema**.
+- **Frontend:** `frontend/` — React 19, Vite 8, Tailwind v4 (CSS-first, no `tailwind.config.js`), TanStack Router (file-based, `routeTree.gen.ts` auto-generated), TanStack Query, axios, zustand, shadcn/ui. Based on `satnaing/shadcn-admin` v2.2.1.
+- **Package managers:** Composer (legacy backend), pnpm (frontend + TS backend).
+- **Tests:** PHPUnit (legacy backend), Vitest (frontend + TS backend).
+- **Code styles:** PhpCsFixer (legacy backend), ESLint/Prettier (frontend + TS backend).
 
-## Scope
+## Repository map
 
-- This guide applies to Kimai core only
-- Work in `var/plugins/` is out of scope unless explicitly requested
-- Each subdirectory in `var/plugins/` is a separate Kimai plugin and its own Git repository
-- In fresh installations, `var/data/` and `var/plugins/` are empty
+- `frontend/` — the SPA + (once added) the TanStack Start server layer.
+- `src/API/` — legacy PHP REST API. **Preserve for now** (still serving un-ported routes); do not add new routes here.
+- `src/` (rest) — Kimai PHP backend services, entities. Legacy; being ported to TS incrementally.
+- `templates/` — Twig templates. Legacy UI, being removed. **Keep** `templates/bundles/NelmioApiDocBundle/`, `templates/emails/`, `templates/invoice/renderer/` + `templates/export/` (invoice/export PDF renderers — legacy API depends on these until ported).
+- `assets/`, `webpack.config.js`, `public/build/` — legacy frontend build. Being removed. **Keep** the `invoice`, `invoice-pdf`, `export-pdf` encore entries while the PDF renderers still run on PHP.
+- `config/`, `migrations/`, `public/`, `tests/`, `translations/` — Kimai PHP backend.
 
-## Repository Map
+## Never touch
 
-- `.docker/` Docker image build files
-- `.github/` GitHub Actions and repository metadata
-- `assets/` JavaScript and Sass sources
-- `bin/` executable entry points, especially `bin/console`
-- `config/` Symfony configuration and bundle setup
-- `migrations/` Doctrine migrations for installs and upgrades
-- `public/` web root with `index.php`
-- `public/build/` generated frontend assets
-- `public/bundles/` generated public bundle assets
-- `src/` core PHP source code
-- `src/API/` the JSON API
-- `templates/` Twig templates
-- `tests/` PHPUnit tests
-- `translations/` XLIFF files named `<component>.<locale>.xlf`
-- `var/` runtime storage and generated content
-- `vendor/` Composer dependencies
+- `var/cache/`, `var/data/`, `var/log/` — Symfony-managed runtime state.
+- `vendor/` — Composer dependencies.
+- `public/bundles/` — plugin frontend assets.
+- `public/build/` — generated; re-generated assets committed only by the maintainer.
 
-## Never Touch
+## Agent workflow
 
-- Do not read from or write to `var/cache/`, it is Symfony-managed internal state
-- Do not modify `vendor/`
-- Do not modify `var/data/`
-- Do not modify `var/log/`
-- Agents may not modify `public/build/`, re-generated frontend assets may only be committed by @kevinpapst
-- Do not modify `public/bundles/`, frontend assets from plugins
+- Read surrounding code before editing. Follow existing local patterns before new abstractions.
+- Keep changes small and targeted. Keep code, identifiers, comments, branches, commit text, docs in English.
+- **Ask before touching security-sensitive areas** — authentication, authorization, permissions.
+- **Commits:** agents may create branches and commit on feature branches. Commits to `main` are made by the maintainer. Do not commit unless the task asks for it.
 
-## Agent Workflow
+## Architecture rules
 
-- Read the surrounding code before editing
-- Follow existing local patterns before introducing new abstractions
-- Keep changes small and targeted
-- Keep code, identifiers, comments, branches, commit text, and documentation in English
-- Ask before touching security-sensitive areas such as authentication, authorization, or permissions
+- **Frontend + new backend work lives in `frontend/`.** Do not add new UI to the Twig layer.
+- **Do not add PHP API routes** — new routes go to TanStack Start; ported routes move from `src/API/` to the TS backend.
+- Do not introduce new composer packages without prior discussion.
+- Preserve backward compatibility for upgrades pulled from upstream.
+- **AGPL-3.0:** forking/customizing our own instance is free; shipping as a hosted SaaS means releasing modified source. Keep licensing headers.
 
-## Architecture Rules
+## Database rules
 
-- Do not introduce new composer packages without prior discussion
-- Prefer services over static helper classes
-- Keep business logic out of controllers
-- Use Twig templates for HTML output
-- Preserve backward compatibility for upgrades
+- The TS backend talks to the same `kimai2_*` schema through an **ORM (Prisma or Drizzle)**. Map the Kimai Doctrine schema (entities + repositories + meta-field tables) — do not change the schema shape.
+- Doctrine entity changes affecting the schema require a migration file (`bin/console doctrine:migrations:diff`, `Doctrine\DBAL\Schema` preferred).
 
-## Database Rules
+## Frontend rules
 
-- Doctrine entity changes affecting the schema require a migration file
-- Generate migration with `bin/console doctrine:migrations:diff`
-- Prefer `Doctrine\DBAL\Schema` in migrations over inline SQL
-- Activate `<env name="BOOTSTRAP_RESET_DATABASE" value="true"/>` in `phpunit.xml` when running tests that require a database change 
+- Build on the shadcn-admin shell (layout, data-table kit, ui primitives, context, hooks, lib, styles). Do not introduce new frontend frameworks without prior discussion.
+- All data flows through `frontend/src/lib/api.ts` (single axios client) + TanStack Query. No ad-hoc fetch calls.
+- Auth: Bearer token (`Authorization: Bearer <token>`), stored via the zustand auth store, validated against `GET /api/me`. The legacy `X-AUTH-USER`/`X-AUTH-TOKEN` headers are deprecated and removed — do not use them.
+- Server-side pagination: Kimai returns `X-Total-Count`/`X-Total-Pages` headers. Tables use `manualPagination`/`manualSorting`/`manualFiltering`.
+- Kimai errors are `{ message, code }` — not `{ title }`. Handle accordingly.
 
-## Frontend and Translation Rules
+## Testing rules
 
-- Build on existing Bootstrap and Tabler patterns
-- Do not introduce new frontend frameworks without prior discussion
-- Keep English translations updated whenever translations change
-- English is the Weblate default language and Kimai fallback language
-- Use Twig `|trans` for user-facing text instead of hardcoded strings
-- Use FontAwesome 6 names for icons
-
-## Testing Rules
-
-- Every PHP class in `src/`, except interfaces, should have a matching PHPUnit test
-- Map `src/<directory>/<ClassName>.php` to `tests/<directory>/<ClassName>Test.php`
-- Cover all public methods with tests
-- Follow the existing test style in the target area such as controller, event, voter, or service tests
+- Every PHP class in `src/`, except interfaces, has a matching PHPUnit test (legacy backend, until ported).
+- Frontend + TS backend: test the API client, auth store, server routes, and pure logic. Follow existing test style in the target area.
 
 ## Validation
 
-- Always run `./php-cs-fixer.sh core`
-- Run `./phpstan.sh core` for changes in `src/`
-- Run `./phpstan.sh test` for changes in `tests/`
-- For focused checks, run `vendor/bin/phpunit tests/<directory>/<TestClassName>.php`
-- Use `composer tests-unit` for broader validation without expensive end-to-end coverage
-- Use `composer tests` when the change justifies running the full suite
-- If tests fail, remove stale cache with `rm -r ./var/cache/test/` to cause a rebuild of the service container
+- Legacy backend: `./php-cs-fixer.sh core`, `./phpstan.sh core` (src/), `./phpstan.sh test` (tests/), `vendor/bin/phpunit tests/<dir>/<Test>.php`, `composer tests-unit`.
+- Frontend + TS backend: `pnpm lint`, `pnpm test`, `pnpm build` (in `frontend/`). Lint must be **0 errors and 0 warnings** — fix every warning (including `react-refresh/only-export-components`) in the files you touch rather than leaving known warnings; e.g. move components out of route files into `features/` or separate files.
+- If legacy backend tests fail, clear stale cache: `rm -r ./var/cache/test/`.
 
-## Git Rules
+## Git rules
 
-- Small fixes should target the active `release-x.y.z` branch
-- Larger changes should go to descriptive `snake_case` feature branches
-- Agents may create branches when needed
-- Commits are created by the maintainer
-- Agents must not create commits unless explicitly asked
+- Small fixes → active `release-x.y.z` branch. Larger changes → descriptive `snake_case` feature branches.
+- Agents may create branches. Commits to `main` by the maintainer only.
+- Use `gh repo set-default NaNomicon/kiminal` — gh otherwise resolves base against the `upstream` remote.
 
-## Coding Conventions
+## Coding conventions
 
-- Use strict comparisons such as `===` and `!==`
-- Prefer constructor promotion for dependency injection
-- Use PHP attributes for routing, mapping, and configuration where established
-- Use `camelCase` for variables and methods
-- Use 4-space indentation
-- Use single quotes for strings in PHP, JavaScript, and CSS unless the local code style requires otherwise
-- Use modern HTML5, Twig, and ES6+ syntax
+- Strict comparisons (`===`, `!==`). Constructor promotion for DI. PHP attributes for routing/mapping where established.
+- `camelCase` for variables/methods. 4-space indentation. Single quotes in PHP/JS/CSS unless local style requires otherwise.
+- Modern HTML5, Twig, ES6+ syntax.
 
-## Security Focus
+## Security focus
 
-- Prevent XSS
-- Prevent CSRF issues
-- Prevent SQL or command injection patterns
-- Prevent auth bypasses
-- Prevent open redirects
-- Apply Rate-Limiting in authentication flows
+- Prevent XSS, CSRF, SQL/command injection, auth bypasses, open redirects. Rate-limit auth flows.

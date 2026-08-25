@@ -11,10 +11,6 @@ Encore
     .addEntry('export-pdf', './assets/export-pdf.js')
     .addEntry('invoice', './assets/invoice.js')
     .addEntry('invoice-pdf', './assets/invoice-pdf.js')
-    .addEntry('chart', './assets/chart.js')
-    .addEntry('calendar', './assets/calendar.js')
-    .addEntry('dashboard', './assets/dashboard.js')
-    .addEntry('highlight', './assets/highlight.js')
 
     .splitEntryChunks()
     .configureSplitChunks((splitChunks) => {

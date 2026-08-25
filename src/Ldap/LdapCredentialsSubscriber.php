@@ -92,7 +92,6 @@ final class LdapCredentialsSubscriber implements EventSubscriberInterface
 
         // new users only exist in memory at this point and the synced attributes/roles of existing
         // users have to be written as well: nothing else in the login process stores the user
-        // (see SamlProvider::findUser() which does the same for SAML logins)
         try {
             $this->userService->saveUser($user);
         } catch (\Exception $ex) {

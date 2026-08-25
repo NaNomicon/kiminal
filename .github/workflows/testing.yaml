@@ -67,6 +67,23 @@ jobs:
             -   name: Install LDAP package (for tests)
                 run: composer require laminas/laminas-ldap
 
+            -   name: Setup PNPM
+                uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+                with:
+                    version: ^11
+
+            -   name: Setup Node.js
+                uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+                with:
+                    node-version: 24
+                    cache: pnpm
+
+            -   name: Build frontend assets
+                # Kiminal keeps the invoice/export PDF renderers on the PHP backend, whose Twig
+                # templates reference the encore build manifest (public/build/entrypoints.json).
+                # The SPA build output is gitignored, so build it here before the test suite runs.
+                run: pnpm install --frozen-lockfile --ignore-scripts && pnpm build
+
             -   name: Setup problem matchers (for PHPUnit)
                 # zizmor: ignore[template-injection] coming from the https://github.com/marketplace/actions/setup-php-action
                 run: echo "::add-matcher::${{ runner.tool_cache }}/phpunit.json"

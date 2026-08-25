@@ -629,8 +629,8 @@ class UserControllerTest extends APIControllerBaseTestCase
         self::assertArrayHasKey('token', $result);
         self::assertArrayHasKey('name', $result);
         self::assertEquals('my-token', $result['name']);
-        self::assertEquals(25, \strlen($result['token']));
-        self::assertMatchesRegularExpression('/^[0-9a-f]{25}$/', $result['token']);
+        self::assertEquals(64, \strlen($result['token']));
+        self::assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $result['token']);
     }
 
     public function testCreateApiTokenWithoutName(): void
@@ -646,7 +646,7 @@ class UserControllerTest extends APIControllerBaseTestCase
         $result = json_decode($content, true);
         self::assertIsArray($result);
         self::assertArrayHasKey('token', $result);
-        self::assertEquals(25, \strlen($result['token']));
+        self::assertEquals(64, \strlen($result['token']));
         self::assertArrayHasKey('name', $result);
         self::assertEquals('', $result['name']);
     }
@@ -673,7 +673,7 @@ class UserControllerTest extends APIControllerBaseTestCase
         self::assertArrayHasKey('token', $result);
         self::assertArrayHasKey('name', $result);
         self::assertEquals('provisioned', $result['name']);
-        self::assertEquals(25, \strlen($result['token']));
+        self::assertEquals(64, \strlen($result['token']));
     }
 
     public function testCreateUserApiTokenAsAdminDenied(): void

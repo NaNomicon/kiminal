@@ -85,7 +85,7 @@ final class CreateUserCommand extends AbstractUserCommand
             $this->userService->saveUser($user);
 
             if (\is_string($apiTokenName)) {
-                $token = substr(bin2hex(random_bytes(100)), 0, 25);
+                $token = bin2hex(random_bytes(32));
                 $accessToken = new AccessToken($user, $token);
                 $accessToken->setName($apiTokenName);
                 $this->accessTokenRepository->saveAccessToken($accessToken);

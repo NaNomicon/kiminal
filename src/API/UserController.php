@@ -253,7 +253,7 @@ final class UserController extends BaseApiController
             throw new BadRequestHttpException('Too many API token requests. Possible attack?');
         }
 
-        $accessToken = new AccessToken($profile, substr(bin2hex(random_bytes(100)), 0, 25));
+        $accessToken = new AccessToken($profile, bin2hex(random_bytes(32)));
 
         $name = $request->request->get('name');
         $accessToken->setName(\is_string($name) ? $name : '');
@@ -286,7 +286,7 @@ final class UserController extends BaseApiController
             throw new BadRequestHttpException('Too many API token requests. Possible attack?');
         }
 
-        $accessToken = new AccessToken($user, substr(bin2hex(random_bytes(100)), 0, 25));
+        $accessToken = new AccessToken($user, bin2hex(random_bytes(32)));
 
         $name = $request->request->get('name');
         $accessToken->setName(\is_string($name) ? $name : '');

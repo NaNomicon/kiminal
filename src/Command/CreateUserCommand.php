@@ -84,16 +84,15 @@ final class CreateUserCommand extends AbstractUserCommand
         try {
             $this->userService->saveUser($user);
 
-            if (is_string($apiTokenName)) {
+            if (\is_string($apiTokenName)) {
                 $token = substr(bin2hex(random_bytes(100)), 0, 25);
                 $accessToken = new AccessToken($user, $token);
                 $accessToken->setName($apiTokenName);
                 $this->accessTokenRepository->saveAccessToken($accessToken);
-                $io->success(\sprintf('Success! Created user: %s', $username));
                 $io->writeln(\sprintf('API token (%s): %s', $apiTokenName, $token));
-            } else {
-                $io->success(\sprintf('Success! Created user: %s', $username));
             }
+
+            $io->success(\sprintf('Success! Created user: %s', $username));
         } catch (ValidationFailedException $ex) {
             $this->validationError($ex, $io);
 

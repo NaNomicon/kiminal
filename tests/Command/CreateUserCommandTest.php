@@ -67,7 +67,7 @@ class CreateUserCommandTest extends KernelTestCase
         self::assertInstanceOf(User::class, $user);
     }
 
-    protected function createUser($username, $email, $role, $password, $apiTokenName = null): CommandTester
+    protected function createUser($username, $email, $role, $password, ?string $apiTokenName = null): CommandTester
     {
         $command = $this->application->find('kimai:user:create');
         $commandTester = new CommandTester($command);

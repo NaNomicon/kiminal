@@ -568,6 +568,7 @@ class UserControllerTest extends APIControllerBaseTestCase
 
         $names = [];
         foreach ($result as $token) {
+            self::assertIsArray($token);
             self::assertArrayHasKey('id', $token);
             self::assertArrayHasKey('name', $token);
             self::assertArrayNotHasKey('token', $token);
@@ -599,11 +600,12 @@ class UserControllerTest extends APIControllerBaseTestCase
         $result = json_decode($content, true);
         self::assertIsArray($result);
 
-        $emptyNameTokens = array_filter($result, static fn (array $token) => $token['name'] === '');
+        $emptyNameTokens = array_filter($result, static fn ($token): bool => \is_array($token) && $token['name'] === '');
         self::assertNotEmpty($emptyNameTokens);
-        $token = array_values($emptyNameTokens)[0];
-        self::assertArrayHasKey('id', $token);
-        self::assertArrayNotHasKey('token', $token);
+        $emptyNameToken = array_values($emptyNameTokens)[0];
+        self::assertIsArray($emptyNameToken);
+        self::assertArrayHasKey('id', $emptyNameToken);
+        self::assertArrayNotHasKey('token', $emptyNameToken);
     }
 
     public function testCreateApiTokenIsSecure(): void

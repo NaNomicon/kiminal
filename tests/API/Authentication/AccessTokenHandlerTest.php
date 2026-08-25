@@ -21,7 +21,6 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\RateLimiter\RateLimiterFactory;
 use Symfony\Component\RateLimiter\Storage\CacheStorage;
 use Symfony\Component\Security\Core\Exception\BadCredentialsException;
-use Symfony\Component\Security\Core\Exception\AuthenticationException;
 
 #[CoversClass(AccessTokenHandler::class)]
 class AccessTokenHandlerTest extends TestCase

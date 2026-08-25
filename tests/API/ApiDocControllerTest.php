@@ -10,7 +10,6 @@
 namespace App\Tests\API;
 
 use App\Entity\User;
-use App\Tests\API\APIControllerBaseTestCase;
 use PHPUnit\Framework\Attributes\Group;
 
 #[Group('integration')]
